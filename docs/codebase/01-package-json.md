@@ -1,0 +1,40 @@
+# 01. `package.json`
+
+Dependencies and scripts (runtime deps: next, react, react-dom only).
+
+```json
+{
+  "name": "textforge-dynamic-tool-suite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TextForge Dynamic Tool Suite: zero-dependency, client-side text utilities on Next.js 15.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "docs:codebase": "node scripts/export-codebase-md.mjs"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "dependencies": {
+    "next": "15.5.28",
+    "react": "19.2.9",
+    "react-dom": "19.2.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "tailwindcss": "4.3.5",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.32"
+  }
+}
+```

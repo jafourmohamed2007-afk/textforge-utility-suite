@@ -1,0 +1,154 @@
+# 17. `app/globals.css`
+
+Tailwind v4 theme tokens, dark mode, 48px tap targets, slider styling.
+
+```css
+@import "tailwindcss";
+
+/*
+ * Design tokens. Semantic colours (ink, panel, line…) flip automatically in
+ * dark mode through CSS variables, so components never need dark: overrides
+ * for surfaces.
+ */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --color-brand-50: #eef4ff;
+  --color-brand-300: #a5b8fc;
+  --color-brand-500: #5b6cf0;
+  --color-brand-600: #4552e0;
+  --color-brand-700: #3a43c4;
+  --color-brand-800: #31389e;
+
+  --color-ink: var(--tf-ink);
+  --color-ink-soft: var(--tf-ink-soft);
+  --color-page: var(--tf-page);
+  --color-panel: var(--tf-panel);
+  --color-panel-strong: var(--tf-panel-strong);
+  --color-surface: var(--tf-surface);
+  --color-line: var(--tf-line);
+  --color-muted-track: var(--tf-muted-track);
+}
+
+:root {
+  color-scheme: light;
+  --tf-ink: #0f172a;
+  --tf-ink-soft: #526075;
+  --tf-page: #f6f7fb;
+  --tf-panel: #ffffff;
+  --tf-panel-strong: #f1f3f9;
+  --tf-surface: #ffffff;
+  --tf-line: #dfe3ec;
+  --tf-muted-track: #c3c9d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --tf-ink: #e6e9f2;
+    --tf-ink-soft: #9aa4b8;
+    --tf-page: #0b0f19;
+    --tf-panel: #121827;
+    --tf-panel-strong: #1a2133;
+    --tf-surface: #172033;
+    --tf-line: #263049;
+    --tf-muted-track: #3a4560;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--tf-page);
+    color: var(--tf-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-offset: -3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* WCAG 2.5.5 target size: every interactive control is at least 48x48 CSS px. */
+@utility tap-target {
+  min-height: 3rem;
+  min-width: 3rem;
+  touch-action: manipulation;
+}
+
+/* Large, thumb-friendly range slider (48px hit area, 28px thumb). */
+@layer components {
+  .range-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    touch-action: pan-y;
+  }
+  .range-input::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--tf-muted-track);
+  }
+  .range-input::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--tf-muted-track);
+  }
+  .range-input::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+  }
+  .range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -0.625rem;
+    height: 1.75rem;
+    width: 1.75rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+    cursor: grab;
+  }
+  .range-input::-moz-range-thumb {
+    height: 1.75rem;
+    width: 1.75rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+    cursor: grab;
+  }
+  .range-input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+  }
+}
+```
