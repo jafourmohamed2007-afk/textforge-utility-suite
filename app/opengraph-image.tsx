@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/site";
 
@@ -6,7 +8,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /** Social preview card generated at build time (no image files to maintain). */
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const mark = await readFile(join(process.cwd(), "app", "icon.svg"));
+  const markSrc = `data:image/svg+xml;base64,${mark.toString("base64")}`;
   return new ImageResponse(
     (
       <div
@@ -23,23 +27,10 @@ export default function OpenGraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div
-            style={{
-              width: 96,
-              height: 96,
-              borderRadius: 20,
-              background: "#0d8571",
-              color: "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 40,
-              fontWeight: 700,
-            }}
-          >
-            KB
+          <img src={markSrc} width={96} height={96} alt="" />
+          <div style={{ display: "flex", fontSize: 52, fontWeight: 800 }}>
+            Fit<span style={{ color: "#6fd3bf" }}>KB</span>
           </div>
-          <div style={{ fontSize: 48, fontWeight: 700 }}>{siteConfig.name}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div style={{ fontSize: 76, fontWeight: 800, lineHeight: 1.05 }}>Resize any photo to the exact KB your form needs</div>

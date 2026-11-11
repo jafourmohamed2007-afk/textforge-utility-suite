@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAllTools } from "@/data/tools-registry";
 import { siteConfig } from "@/lib/site";
+import { Logo } from "./Logo";
 
 const mainNav = [
   { href: "/guides", label: "Guides" },
@@ -16,11 +17,8 @@ export function SiteHeader({ activeSlug, activeSection }: { activeSlug?: string;
   return (
     <header className="border-b border-line bg-panel">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 pt-1">
-        <Link href="/" className="tap-target inline-flex items-center gap-2 text-lg font-bold tracking-tight text-ink">
-          <span aria-hidden="true" className="grid size-8 place-items-center rounded-lg bg-brand-600 font-mono text-xs font-bold text-white">
-            KB
-          </span>
-          {siteConfig.name}
+        <Link href="/" aria-label={`${siteConfig.name} home`} className="tap-target inline-flex items-center">
+          <Logo id="header" />
         </Link>
         <nav aria-label="Main">
           <ul className="flex gap-1">

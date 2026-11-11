@@ -1,4 +1,4 @@
-# 44. `components/AdSlot.tsx`
+# 45. `components/AdSlot.tsx`
 
 Optional AdSense unit with reserved height.
 

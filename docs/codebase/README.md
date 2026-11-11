@@ -38,16 +38,17 @@ Each file below is one source file. Create the file at the path shown and paste 
 34. [`app/sitemap.ts`](./34-app-sitemap-ts.md) — sitemap.xml generated from the registry.
 35. [`app/robots.ts`](./35-app-robots-ts.md) — robots.txt.
 36. [`app/manifest.ts`](./36-app-manifest-ts.md) — Web app manifest.
-37. [`app/icon.svg`](./37-app-icon-svg.md) — Favicon.
+37. [`app/icon.svg`](./37-app-icon-svg.md) — Logo mark, used as the favicon.
 38. [`components/SiteHeader.tsx`](./38-components-siteheader-tsx.md) — Header with main navigation and preset chips.
 39. [`components/SiteFooter.tsx`](./39-components-sitefooter-tsx.md) — Footer with presets, guides and policy links.
-40. [`components/Breadcrumbs.tsx`](./40-components-breadcrumbs-tsx.md) — Visible breadcrumb trail.
-41. [`components/RichText.tsx`](./41-components-richtext-tsx.md) — Renders content text with links.
-42. [`components/ContentSections.tsx`](./42-components-contentsections-tsx.md) — Renders guide and policy sections: paragraphs, lists, tables, notes.
-43. [`components/DocPage.tsx`](./43-components-docpage-tsx.md) — Shared layout for About, Contact and the legal pages.
-44. [`components/AdSlot.tsx`](./44-components-adslot-tsx.md) — Optional AdSense unit with reserved height.
-45. [`components/OptionControl.tsx`](./45-components-optioncontrol-tsx.md) — Touch-friendly select / range / toggle controls.
-46. [`components/PhotoWorkspace.tsx`](./46-components-photoworkspace-tsx.md) — Client workspace: upload, settings, live compression, preview, download.
-47. [`components/ToolGuide.tsx`](./47-components-toolguide-tsx.md) — E-E-A-T content panels: how-to, output spec, method, FAQ.
-48. [`tests/image.test.ts`](./48-tests-image-test-ts.md) — Node test runner unit tests for the math and size search.
-49. [`tests/content.test.ts`](./49-tests-content-test-ts.md) — Content checks: links resolve, unique titles, guide length, AdSense settings.
+40. [`components/Logo.tsx`](./40-components-logo-tsx.md) — Inline logo mark and wordmark.
+41. [`components/Breadcrumbs.tsx`](./41-components-breadcrumbs-tsx.md) — Visible breadcrumb trail.
+42. [`components/RichText.tsx`](./42-components-richtext-tsx.md) — Renders content text with links.
+43. [`components/ContentSections.tsx`](./43-components-contentsections-tsx.md) — Renders guide and policy sections: paragraphs, lists, tables, notes.
+44. [`components/DocPage.tsx`](./44-components-docpage-tsx.md) — Shared layout for About, Contact and the legal pages.
+45. [`components/AdSlot.tsx`](./45-components-adslot-tsx.md) — Optional AdSense unit with reserved height.
+46. [`components/OptionControl.tsx`](./46-components-optioncontrol-tsx.md) — Touch-friendly select / range / toggle controls.
+47. [`components/PhotoWorkspace.tsx`](./47-components-photoworkspace-tsx.md) — Client workspace: upload, settings, live compression, preview, download.
+48. [`components/ToolGuide.tsx`](./48-components-toolguide-tsx.md) — E-E-A-T content panels: how-to, output spec, method, FAQ.
+49. [`tests/image.test.ts`](./49-tests-image-test-ts.md) — Node test runner unit tests for the math and size search.
+50. [`tests/content.test.ts`](./50-tests-content-test-ts.md) — Content checks: links resolve, unique titles, guide length, AdSense settings.

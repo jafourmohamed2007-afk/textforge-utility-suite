@@ -1,4 +1,4 @@
-# 41. `components/RichText.tsx`
+# 42. `components/RichText.tsx`
 
 Renders content text with links.
 

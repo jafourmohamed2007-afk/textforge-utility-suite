@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.svg">
+    <img src="public/logo.svg" alt="FitKB" width="300">
+  </picture>
+</p>
+
 # FitKB Photo Resizer
 
 FitKB resizes and compresses photos to an exact KB limit for online forms: 10 KB to 1 MB, 35×45 mm and 2×2 inch passport photos, and signatures. It also publishes plain-language guides, a FAQ and the trust pages (About, Contact, Privacy, Terms, Disclaimer) that ad networks and search engines look for. It is built with **Next.js 15 (App Router)**, **strict TypeScript** and **Tailwind CSS v4**. All image processing runs in the browser with the Canvas API, so photos are never uploaded.
@@ -72,6 +79,20 @@ Approval and traffic are decided by Google, so nothing in the code can guarantee
 - **Touch:** every control is at least 48×48 px. Number fields use a 16 px font, so iOS does not zoom when you tap them.
 - **Ways to add a photo:** tap to pick one (gallery or camera), drag and drop, or paste.
 - **Metadata:** titles follow `"<Preset> Online - Free Photo Resizer (2026 Mobile Friendly)"`. Each preset page includes `SoftwareApplication`, `HowTo`, `FAQPage` and `BreadcrumbList` JSON-LD, plus how-to, specification, methodology and FAQ sections that match the structured data. Guides use `Article` JSON-LD with published and updated dates, a quick answer at the top, a table of contents, and links to the matching tools. Tool pages link back to related guides.
+
+## Logo and icons
+
+The mark is a crop frame with an arrow landing on the size-limit line: "fit under the limit".
+
+| File | Use |
+| --- | --- |
+| `app/icon.svg`, `app/favicon.ico` (48 px) | Browser tab and Google Search favicon |
+| `app/apple-icon.png` (180 px) | iPhone home screen |
+| `public/icon-192.png`, `public/icon-512.png`, `public/icon-maskable-512.png` | Installable web app (manifest) |
+| `public/logo.svg`, `public/logo-dark.svg`, `public/logo-wordmark.png` | Mark plus wordmark for light and dark backgrounds |
+| `components/Logo.tsx` | The same artwork inline in the header and footer |
+
+The Organization JSON-LD points to `icon-512.png` as the logo, and the social preview image uses the mark.
 
 ## Reviewing on mobile
 

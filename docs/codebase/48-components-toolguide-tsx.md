@@ -1,4 +1,4 @@
-# 47. `components/ToolGuide.tsx`
+# 48. `components/ToolGuide.tsx`
 
 E-E-A-T content panels: how-to, output spec, method, FAQ.
 

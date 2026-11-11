@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getAllGuides } from "@/data/guides";
 import { getAllTools } from "@/data/tools-registry";
 import { siteConfig } from "@/lib/site";
+import { Logo } from "./Logo";
 
 const companyLinks = [
   { href: "/about", label: "About" },
@@ -19,7 +20,8 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-line bg-panel">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="font-semibold text-ink">{siteConfig.fullName}</p>
+          <Logo id="footer" />
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-ink-soft">Photo Resizer</p>
           <p className="mt-2 max-w-prose text-ink-soft">
             Photos are resized and compressed inside your browser. They are never uploaded, stored or seen by us.
             {siteConfig.adsenseClient ? " The site is funded by ads served by Google; see the privacy policy for details." : ""}

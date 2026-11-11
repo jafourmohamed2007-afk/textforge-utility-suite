@@ -1,4 +1,4 @@
-# 42. `components/ContentSections.tsx`
+# 43. `components/ContentSections.tsx`
 
 Renders guide and policy sections: paragraphs, lists, tables, notes.
 

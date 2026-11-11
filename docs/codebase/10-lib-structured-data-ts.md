@@ -87,7 +87,7 @@ export function organizationSchema(): JsonLd {
     "@id": `${absoluteUrl("/")}#organization`,
     name: siteConfig.fullName,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/icon.svg"),
+    logo: { "@type": "ImageObject", url: absoluteUrl("/icon-512.png"), width: 512, height: 512 },
     email: siteConfig.contactEmail,
     contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: siteConfig.contactEmail, url: absoluteUrl("/contact") },
   };

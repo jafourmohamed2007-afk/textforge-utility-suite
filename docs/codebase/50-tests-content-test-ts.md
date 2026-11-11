@@ -1,4 +1,4 @@
-# 49. `tests/content.test.ts`
+# 50. `tests/content.test.ts`
 
 Content checks: links resolve, unique titles, guide length, AdSense settings.
 

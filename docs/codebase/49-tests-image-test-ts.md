@@ -1,4 +1,4 @@
-# 48. `tests/image.test.ts`
+# 49. `tests/image.test.ts`
 
 Node test runner unit tests for the math and size search.
 

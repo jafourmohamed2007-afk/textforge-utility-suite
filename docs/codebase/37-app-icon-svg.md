@@ -1,7 +1,7 @@
 # 37. `app/icon.svg`
 
-Favicon.
+Logo mark, used as the favicon.
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0d8571"/><text x="32" y="41" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">KB</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a088"/><stop offset="1" stop-color="#0a6a5b"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#g)"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M13 23V13h10M41 13h10v10M13 41v10h10M51 41v10H41" stroke-width="4" opacity=".9"/><path d="M32 17v19M24.5 29 32 36.5 39.5 29" stroke-width="5"/></g><path d="M22 44h20" stroke="#ffd166" stroke-width="4.5" stroke-linecap="round"/></svg>
 ```

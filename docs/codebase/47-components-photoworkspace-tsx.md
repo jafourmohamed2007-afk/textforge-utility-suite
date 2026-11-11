@@ -1,4 +1,4 @@
-# 46. `components/PhotoWorkspace.tsx`
+# 47. `components/PhotoWorkspace.tsx`
 
 Client workspace: upload, settings, live compression, preview, download.
 
