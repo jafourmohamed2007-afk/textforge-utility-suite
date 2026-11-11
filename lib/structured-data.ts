@@ -1,4 +1,5 @@
-import type { ToolDefinition } from "./types";
+import type { FaqEntry, GuideDefinition, ToolDefinition } from "./types";
+import { stripLinks } from "./links";
 import { absoluteUrl, buildToolTitle, siteConfig } from "./site";
 
 type JsonLd = Record<string, unknown>;
@@ -50,25 +51,28 @@ export function howToSchema(tool: ToolDefinition): JsonLd {
   };
 }
 
-export function faqSchema(tool: ToolDefinition): JsonLd {
+export function faqSchema(path: string, entries: readonly FaqEntry[]): JsonLd {
   return {
     "@type": "FAQPage",
-    "@id": `${absoluteUrl(`/${tool.slug}`)}#faq`,
-    mainEntity: tool.faq.map((entry) => ({
+    "@id": `${absoluteUrl(path)}#faq`,
+    mainEntity: entries.map((entry) => ({
       "@type": "Question",
       name: entry.question,
-      acceptedAnswer: { "@type": "Answer", text: entry.answer },
+      acceptedAnswer: { "@type": "Answer", text: stripLinks(entry.answer) },
     })),
   };
 }
 
-export function breadcrumbSchema(tool: ToolDefinition): JsonLd {
+/** Breadcrumb trail from the home page; each item is [name, path]. */
+export function breadcrumbSchema(trail: ReadonlyArray<readonly [string, string]>): JsonLd {
   return {
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: siteConfig.name, item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: tool.name, item: absoluteUrl(`/${tool.slug}`) },
-    ],
+    itemListElement: [[siteConfig.name, "/"] as const, ...trail].map(([name, path], index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name,
+      item: absoluteUrl(path),
+    })),
   };
 }
 
@@ -78,13 +82,76 @@ export function organizationSchema(): JsonLd {
     "@id": `${absoluteUrl("/")}#organization`,
     name: siteConfig.fullName,
     url: absoluteUrl("/"),
+    logo: absoluteUrl("/icon.svg"),
+    email: siteConfig.contactEmail,
+    contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: siteConfig.contactEmail, url: absoluteUrl("/contact") },
   };
 }
 
 export function toolPageGraph(tool: ToolDefinition): JsonLd {
+  const path = `/${tool.slug}`;
   return {
     "@context": "https://schema.org",
-    "@graph": [organizationSchema(), softwareApplicationSchema(tool), howToSchema(tool), faqSchema(tool), breadcrumbSchema(tool)],
+    "@graph": [
+      organizationSchema(),
+      softwareApplicationSchema(tool),
+      howToSchema(tool),
+      faqSchema(path, tool.faq),
+      breadcrumbSchema([[tool.name, path]]),
+    ],
+  };
+}
+
+export function guidePageGraph(guide: GuideDefinition): JsonLd {
+  const path = `/guides/${guide.slug}`;
+  const url = absoluteUrl(path);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      organizationSchema(),
+      {
+        "@type": "Article",
+        "@id": `${url}#article`,
+        headline: guide.title,
+        description: guide.description,
+        abstract: stripLinks(guide.summary),
+        url,
+        mainEntityOfPage: url,
+        inLanguage: "en",
+        datePublished: guide.published,
+        dateModified: guide.updated,
+        articleSection: guide.topic,
+        author: { "@id": `${absoluteUrl("/")}#organization` },
+        publisher: { "@id": `${absoluteUrl("/")}#organization` },
+        image: absoluteUrl("/opengraph-image"),
+      },
+      faqSchema(path, guide.faq),
+      breadcrumbSchema([
+        ["Guides", "/guides"],
+        [guide.title, path],
+      ]),
+    ],
+  };
+}
+
+/** WebPage + breadcrumb graph for simple pages such as About or Privacy. */
+export function simplePageGraph(name: string, path: string, description: string, type = "WebPage"): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      organizationSchema(),
+      {
+        "@type": type,
+        "@id": `${absoluteUrl(path)}#webpage`,
+        name,
+        description,
+        url: absoluteUrl(path),
+        inLanguage: "en",
+        isPartOf: { "@id": `${absoluteUrl("/")}#website` },
+        dateModified: siteConfig.policiesUpdated,
+      },
+      breadcrumbSchema([[name, path]]),
+    ],
   };
 }
 

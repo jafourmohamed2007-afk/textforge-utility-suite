@@ -93,3 +93,38 @@ export interface ToolDefinition {
   lastReviewed: string;
   relatedSlugs: readonly string[];
 }
+
+/**
+ * Long-form content blocks for guides and site pages. Paragraph and list text
+ * may contain internal links written as [label](/path); the renderer turns
+ * them into <Link> elements and tests check every target exists.
+ */
+export type ContentBlock =
+  | { type: "p"; text: string }
+  | { type: "ul"; items: readonly string[] }
+  | { type: "ol"; items: readonly string[] }
+  | { type: "table"; caption: string; head: readonly string[]; rows: ReadonlyArray<readonly string[]> }
+  | { type: "note"; text: string };
+
+export interface ContentSection {
+  /** Visible H2; its slugified form is used as the anchor id. */
+  heading: string;
+  blocks: readonly ContentBlock[];
+}
+
+export interface GuideDefinition {
+  slug: string;
+  /** H1 and <title> (before the site suffix). */
+  title: string;
+  /** Meta description and card text. */
+  description: string;
+  /** Two or three sentence direct answer shown at the top of the article. */
+  summary: string;
+  topic: "Basics" | "Photo ID" | "Signature" | "Formats" | "Troubleshooting";
+  published: string;
+  updated: string;
+  sections: readonly ContentSection[];
+  /** Tool slugs promoted from this guide. */
+  relatedTools: readonly string[];
+  faq: readonly FaqEntry[];
+}

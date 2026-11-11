@@ -66,6 +66,38 @@ export function PhotoWorkspace({ preset, label }: { preset: PresetSpec; label: s
   const [status, setStatus] = useState<Status>("empty");
   const [message, setMessage] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [canShare, setCanShare] = useState(false);
+  const [saved, setSaved] = useState<"download" | "share" | null>(null);
+
+  // Web Share with files (mainly iPhone and Android) lets people save straight to Photos.
+  useEffect(() => {
+    try {
+      const probe = new File([new Uint8Array(1)], "probe.jpg", { type: "image/jpeg" });
+      setCanShare(typeof navigator.canShare === "function" && navigator.canShare({ files: [probe] }));
+    } catch {
+      setCanShare(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!saved) return;
+    const timer = setTimeout(() => setSaved(null), 2500);
+    return () => clearTimeout(timer);
+  }, [saved]);
+
+  async function shareResult() {
+    if (!result) return;
+    const file = new File([result.blob], result.fileName, { type: result.blob.type });
+    try {
+      await navigator.share({ files: [file], title: result.fileName });
+      setSaved("share");
+    } catch (error) {
+      // AbortError = the person closed the share sheet; nothing to report.
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setMessage("Sharing is not available here. Use Download instead.");
+      }
+    }
+  }
 
   const acceptFile = useCallback(async (file: File | undefined | null) => {
     if (!file) return;
@@ -168,7 +200,7 @@ export function PhotoWorkspace({ preset, label }: { preset: PresetSpec; label: s
   }
 
   const original = photo ? `${formatBytes(photo.size)} · ${photo.width} × ${photo.height}` : "—";
-  const saved = photo && result ? Math.max(0, Math.round((1 - result.blob.size / photo.size) * 100)) : null;
+  const savedPercent = photo && result ? Math.max(0, Math.floor((1 - result.blob.size / photo.size) * 100)) : null;
   const dimsDisabled = settings.mode === "original";
   const tone = status === "error" || (result && !result.fits) ? "text-rose-700 dark:text-rose-300" : "text-ink-soft";
 
@@ -232,32 +264,52 @@ export function PhotoWorkspace({ preset, label }: { preset: PresetSpec; label: s
                 className={`ml-2 inline-block size-2 rounded-full align-middle ${status === "working" ? "animate-pulse bg-amber-500" : "bg-transparent"}`}
               />
             </h2>
-            {result && status !== "error" ? (
-              <a
-                href={result.url}
-                download={result.fileName}
-                className="tap-target inline-flex w-40 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Download
-              </a>
-            ) : (
-              <button type="button" disabled className="tap-target inline-flex w-40 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white opacity-40">
-                Download
-              </button>
-            )}
           </div>
           <div className="checker m-3 flex h-64 items-center justify-center overflow-hidden rounded-xl sm:h-80">
             {result ? (
               <img src={result.url} alt={`Compressed photo, ${formatBytes(result.blob.size)}`} className="h-full w-full object-contain" />
             ) : (
-              <p className="px-6 text-center text-sm text-ink-soft">The compressed photo appears here, ready to download.</p>
+              <p className="px-6 text-center text-sm text-ink-soft">The compressed photo appears here. The Download button below turns on when it is ready.</p>
             )}
           </div>
-          <p role="status" aria-live="polite" className={`min-h-8 px-3 pb-3 text-xs ${tone}`}>
+          {/* Fixed-height action row: buttons enable in place, nothing below moves. */}
+          <div className="flex gap-2 px-3">
+            {result && status !== "error" ? (
+              <a
+                href={result.url}
+                download={result.fileName}
+                onClick={() => setSaved("download")}
+                className="tap-target inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-base font-semibold text-white transition-colors hover:bg-brand-700"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="truncate">
+                  {saved === "download" ? "Downloaded" : `Download ${result.format === "webp" ? "WebP" : "JPG"}`}
+                  <span className="font-mono font-normal tabular-nums opacity-90"> · {formatBytes(result.blob.size)}</span>
+                </span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="tap-target inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-base font-semibold text-white opacity-40"
+              >
+                Download
+              </button>
+            )}
+            {canShare ? (
+              <button type="button" onClick={() => void shareResult()} disabled={!result || status === "error"} className={panelButton}>
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="mr-1.5 size-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 15V3m0 0-4 4m4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {saved === "share" ? "Shared" : "Share"}
+              </button>
+            ) : null}
+          </div>
+          <p role="status" aria-live="polite" className={`min-h-16 px-3 py-2 text-xs ${tone}`}>
             {message}
+            {result && status === "done" ? <span className="block truncate text-ink-soft">File name: {result.fileName}</span> : null}
           </p>
         </div>
       </div>
@@ -270,7 +322,7 @@ export function PhotoWorkspace({ preset, label }: { preset: PresetSpec; label: s
           ["Limit", `${formatByteCount(targetBytes(settings.targetKB))}`],
           ["Dimensions", result ? `${result.width} × ${result.height}` : "—"],
           ["Quality", result ? `${Math.round(result.quality * 100)}%` : "—"],
-          ["Saved", saved === null ? "—" : `${saved}%`],
+          ["Saved", savedPercent === null ? "—" : `${savedPercent}%`],
         ].map(([name, value]) => (
           <div key={name} className="flex items-baseline gap-1.5">
             <dt className="text-ink-soft">{name}</dt>

@@ -29,15 +29,21 @@ const sharedFaq: readonly FaqEntry[] = [
   },
 ];
 
+/** "20 KB", or "1 MB" for 1000 KB. */
+function sizeLabel(kb: number): string {
+  return kb >= 1000 && kb % 1000 === 0 ? `${kb / 1000} MB` : `${kb} KB`;
+}
+
 function compressSteps(kb: number): readonly HowToStep[] {
+  const label = sizeLabel(kb);
   return [
     {
       title: "Choose your photo",
       body: "Tap the upload area to pick a photo from your gallery or camera, drag a file onto it, or paste an image. JPG, PNG and WebP all work.",
     },
     {
-      title: `Keep ${kb} KB as the limit`,
-      body: `The size limit is already set to ${kb} KB. Change it if your form asks for something else. You can also cap the width and height.`,
+      title: `Keep ${label} as the limit`,
+      body: `The size limit is already set to ${label}. Change it if your form asks for something else. You can also cap the width and height.`,
     },
     {
       title: "Let FitKB find the best quality",
@@ -56,7 +62,7 @@ function compressPreset(targetKB: number): PresetSpec {
 
 function compressSpecs(kb: number, typical: string): readonly SpecRow[] {
   return [
-    { label: "Size limit", value: `${kb} KB or less (${(kb * 1000).toLocaleString("en-US")} bytes)` },
+    { label: "Size limit", value: `${sizeLabel(kb)} or less (${(kb * 1000).toLocaleString("en-US")} bytes)` },
     { label: "Output format", value: "JPEG (WebP optional)" },
     { label: "Dimensions", value: "Original, shrunk only if needed" },
     { label: "Typical result", value: typical },
@@ -353,6 +359,173 @@ export const toolsRegistry = [
     ],
     lastReviewed: LAST_REVIEWED,
     relatedSlugs: ["passport-size-photo-35x45mm", "compress-image-to-20kb", "compress-image-to-10kb"],
+  },
+  {
+    slug: "compress-image-to-30kb",
+    name: "Compress Image to 30KB",
+    shortName: "30 KB",
+    tagline: "Reduce a photo or scan to 30 KB or less for application forms. Free, private and works on any phone.",
+    intro:
+      "30 KB sits between the very strict 20 KB limits and the more generous 50 KB ones, and is common for application photos and thumb impressions. FitKB keeps the highest quality that fits under 30 KB.",
+    category: "Compress",
+    keywords: ["compress image to 30kb", "reduce photo size to 30kb", "jpg to 30kb", "30kb photo converter", "resize image 30kb"],
+    preset: compressPreset(30),
+    specs: compressSpecs(30, "About 350 to 600 px wide for a normal photo"),
+    howTo: compressSteps(30),
+    faq: [
+      {
+        question: "My form allows 10 KB to 30 KB. What limit should I set?",
+        answer:
+          "Set 30 KB. FitKB picks the highest quality under the limit, so the file normally lands just under 30 KB and well above the 10 KB minimum.",
+      },
+      {
+        question: "Is 30 KB enough for a clear face photo?",
+        answer:
+          "Yes for a head-and-shoulders photo with a plain background. Crop out empty space first so more of the 30 KB is spent on the face.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-20kb", "compress-image-to-40kb", "compress-image-to-50kb"],
+  },
+  {
+    slug: "compress-image-to-40kb",
+    name: "Compress Image to 40KB",
+    shortName: "40 KB",
+    tagline: "Get any JPG, PNG or WebP photo under 40 KB without a visible drop in quality. No upload, no watermark.",
+    intro:
+      "Some portals cap photos at 40 KB, often with a lower minimum such as 20 KB. FitKB compresses your photo in the browser and keeps the sharpest version that stays under 40 KB.",
+    category: "Compress",
+    keywords: ["compress image to 40kb", "reduce image size to 40kb", "jpg to 40kb", "photo 40kb", "image resize 40kb online"],
+    preset: compressPreset(40),
+    specs: compressSpecs(40, "About 450 to 700 px wide for a normal photo"),
+    howTo: compressSteps(40),
+    faq: [
+      {
+        question: "How do I make sure the photo is not below a 20 KB minimum?",
+        answer:
+          "Use 40 KB as the limit. Results land close to the limit, and the exact byte count is shown so you can confirm it is above the minimum.",
+      },
+      {
+        question: "Can I also set exact pixel dimensions?",
+        answer:
+          "Yes. Choose Exact width × height, crop to fill in the Dimensions setting and enter the numbers from your form. FitKB then compresses that crop under 40 KB.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-30kb", "compress-image-to-50kb", "passport-size-photo-35x45mm"],
+  },
+  {
+    slug: "compress-image-to-150kb",
+    name: "Compress Image to 150KB",
+    shortName: "150 KB",
+    tagline: "Compress photos to 150 KB or less for job portals, scholarship forms and email. Private and mobile friendly.",
+    intro:
+      "150 KB is large enough to keep a full-screen photo crisp and small enough for most upload limits. FitKB usually reaches it by adjusting JPEG quality alone, keeping a large part of the original resolution.",
+    category: "Compress",
+    keywords: ["compress image to 150kb", "reduce photo size to 150kb", "jpg to 150kb", "image 150kb converter", "resize image 150kb"],
+    preset: compressPreset(150),
+    specs: compressSpecs(150, "About 1000 to 1500 px wide for a normal photo"),
+    howTo: compressSteps(150),
+    faq: [
+      {
+        question: "Will a document photo stay readable at 150 KB?",
+        answer:
+          "Usually yes. Photograph the page flat in good light so the text is sharp, then check the preview at full zoom before downloading.",
+      },
+      {
+        question: "Why is my result much smaller than 150 KB?",
+        answer:
+          "If the original is already small or simple, FitKB keeps it at the highest quality and it simply does not need 150 KB. It never adds data to reach a size.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-100kb", "compress-image-to-200kb", "compress-image-to-300kb"],
+  },
+  {
+    slug: "compress-image-to-300kb",
+    name: "Compress Image to 300KB",
+    shortName: "300 KB",
+    tagline: "Bring large phone photos under 300 KB while keeping them sharp for screens and small prints. Free and private.",
+    intro:
+      "300 KB is a common limit for listing photos, ID documents and attachments. Phone photos of 3 to 10 MB usually reach it at high JPEG quality, so detail stays clear.",
+    category: "Compress",
+    keywords: ["compress image to 300kb", "reduce image size to 300kb", "jpg to 300kb", "photo 300kb", "image compressor 300kb"],
+    preset: compressPreset(300),
+    specs: compressSpecs(300, "About 1500 to 2200 px wide for a normal photo"),
+    howTo: compressSteps(300),
+    faq: [
+      {
+        question: "Is 300 KB good enough for an ID document scan?",
+        answer:
+          "For most portals, yes. Keep the document flat, fill the frame and avoid glare. If text looks soft, retake the photo closer rather than raising the size.",
+      },
+      {
+        question: "Can I compress several photos at once?",
+        answer: "FitKB processes one photo at a time so you can check each result. Choosing the next photo keeps your settings.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-200kb", "compress-image-to-500kb", "compress-image-to-150kb"],
+  },
+  {
+    slug: "compress-image-to-500kb",
+    name: "Compress Image to 500KB",
+    shortName: "500 KB",
+    tagline: "Shrink a photo to 500 KB or less with almost no visible change. Ideal for email, marketplaces and portals.",
+    intro:
+      "At 500 KB most phone photos keep their full resolution or close to it. FitKB lowers JPEG quality only as far as needed, which is usually invisible at this size.",
+    category: "Compress",
+    keywords: ["compress image to 500kb", "reduce photo size to 500kb", "jpg to 500kb", "image size 500kb", "resize photo under 500kb"],
+    preset: compressPreset(500),
+    specs: compressSpecs(500, "Often 2000 px or more, close to the original"),
+    howTo: compressSteps(500),
+    faq: [
+      {
+        question: "Will people notice the photo was compressed?",
+        answer:
+          "Rarely at 500 KB. Differences mostly appear in very fine textures such as grass or hair, and only when zoomed in.",
+      },
+      {
+        question: "What if my photo is a PNG screenshot?",
+        answer:
+          "It is converted to JPG, which works well for photos. For screenshots of text, check the preview at full zoom; if letters look soft, use WebP if your form accepts it.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-300kb", "compress-image-to-1mb", "compress-image-to-200kb"],
+  },
+  {
+    slug: "compress-image-to-1mb",
+    name: "Compress Image to 1MB",
+    shortName: "1 MB",
+    tagline: "Reduce large photos to under 1 MB for uploads and email while keeping them sharp. Free, private, no upload.",
+    intro:
+      "Many sites limit uploads to 1 MB, while phone cameras save 3 to 10 MB photos. FitKB gets them under 1,000,000 bytes, which passes both 1000- and 1024-based checks, while keeping as much resolution as the limit allows.",
+    category: "Compress",
+    keywords: ["compress image to 1mb", "reduce photo size to 1mb", "jpg under 1mb", "image compressor 1mb", "resize image to 1mb"],
+    preset: compressPreset(1000),
+    specs: compressSpecs(1000, "About 2500 px or more on the long edge"),
+    howTo: compressSteps(1000),
+    faq: [
+      {
+        question: "Is 1 MB 1000 KB or 1024 KB here?",
+        answer:
+          "FitKB keeps the file at or under 1,000,000 bytes, which is under the limit whether a site counts 1 MB as 1000 KB or 1024 KB.",
+      },
+      {
+        question: "Does it work for very large photos, like 48 MP?",
+        answer:
+          "Yes, though it takes a few seconds longer because the photo is encoded several times. Phones with little memory may need a smaller original.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-500kb", "compress-image-to-300kb", "compress-image-to-200kb"],
   },
 ] as const satisfies readonly ToolDefinition[];
 

@@ -142,5 +142,6 @@ export async function compressPhoto(photo: LoadedPhoto, preset: PresetSpec): Pro
 
 export function outputFileName(originalName: string, targetKB: number, format: OutputFormat): string {
   const base = originalName.replace(/\.[^.]+$/, "").replace(/[^\w-]+/g, "-").replace(/^-+|-+$/g, "") || "photo";
-  return `${base}-${targetKB}kb.${format === "webp" ? "webp" : "jpg"}`;
+  const size = targetKB >= 1000 && targetKB % 1000 === 0 ? `${targetKB / 1000}mb` : `${targetKB}kb`;
+  return `${base}-${size}.${format === "webp" ? "webp" : "jpg"}`;
 }

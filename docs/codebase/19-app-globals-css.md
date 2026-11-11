@@ -1,0 +1,165 @@
+# 19. `app/globals.css`
+
+Tailwind v4 theme tokens, dark mode, 48px tap targets, slider and checkerboard.
+
+```css
+@import "tailwindcss";
+
+/*
+ * Design tokens. Semantic colours (ink, panel, line…) flip automatically in
+ * dark mode through CSS variables, so components never need dark: overrides
+ * for surfaces.
+ */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --color-brand-50: #e9f7f4;
+  --color-brand-300: #6fd3bf;
+  --color-brand-500: #14a088;
+  --color-brand-600: #0d8571;
+  --color-brand-700: #0a6a5b;
+  --color-brand-800: #08544a;
+
+  --color-ink: var(--tf-ink);
+  --color-ink-soft: var(--tf-ink-soft);
+  --color-page: var(--tf-page);
+  --color-panel: var(--tf-panel);
+  --color-panel-strong: var(--tf-panel-strong);
+  --color-surface: var(--tf-surface);
+  --color-line: var(--tf-line);
+  --color-muted-track: var(--tf-muted-track);
+}
+
+:root {
+  color-scheme: light;
+  --tf-ink: #10201d;
+  --tf-ink-soft: #4f625e;
+  --tf-page: #f4f7f6;
+  --tf-panel: #ffffff;
+  --tf-panel-strong: #edf2f0;
+  --tf-surface: #ffffff;
+  --tf-line: #dbe4e1;
+  --tf-muted-track: #bfcdc9;
+  --tf-checker: #e8eeec;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --tf-ink: #e3ece9;
+    --tf-ink-soft: #94a8a3;
+    --tf-page: #0a1312;
+    --tf-panel: #111c1a;
+    --tf-panel-strong: #182624;
+    --tf-surface: #152220;
+    --tf-line: #243633;
+    --tf-muted-track: #36504b;
+    --tf-checker: #1b2a27;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--tf-page);
+    color: var(--tf-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-offset: -3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* WCAG 2.5.5 target size: every interactive control is at least 48x48 CSS px. */
+@utility tap-target {
+  min-height: 3rem;
+  min-width: 3rem;
+  touch-action: manipulation;
+}
+
+/* Checkerboard behind image previews so padding and transparency are visible. */
+@utility checker {
+  background-color: var(--tf-panel-strong);
+  background-image: linear-gradient(45deg, var(--tf-checker) 25%, transparent 25%), linear-gradient(-45deg, var(--tf-checker) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--tf-checker) 75%), linear-gradient(-45deg, transparent 75%, var(--tf-checker) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+/* Large, thumb-friendly range slider (48px hit area, 28px thumb). */
+@layer components {
+  .range-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    touch-action: pan-y;
+  }
+  .range-input::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--tf-muted-track);
+  }
+  .range-input::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--tf-muted-track);
+  }
+  .range-input::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+  }
+  .range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -0.625rem;
+    height: 1.75rem;
+    width: 1.75rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+    cursor: grab;
+  }
+  .range-input::-moz-range-thumb {
+    height: 1.75rem;
+    width: 1.75rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+    cursor: grab;
+  }
+  .range-input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+  }
+}
+```

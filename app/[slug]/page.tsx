@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PhotoWorkspace } from "@/components/PhotoWorkspace";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ToolGuide } from "@/components/ToolGuide";
+import { getGuidesForTool } from "@/data/guides";
 import { getAllTools, getRelatedTools, getToolBySlug } from "@/data/tools-registry";
 import { absoluteUrl, buildToolTitle, siteConfig } from "@/lib/site";
 import { serializeJsonLd, toolPageGraph } from "@/lib/structured-data";
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
       title,
       description: tool.tagline,
     },
-    twitter: { card: "summary", title, description: tool.tagline },
+    twitter: { card: "summary_large_image", title, description: tool.tagline },
     other: { "last-reviewed": tool.lastReviewed },
   };
 }
@@ -57,19 +58,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(toolPageGraph(tool)) }} />
       <SiteHeader activeSlug={tool.slug} />
       <main id="main" className="mx-auto max-w-6xl px-4 pb-8 pt-2 sm:pt-4">
-        <nav aria-label="Breadcrumb" className="text-sm text-ink-soft">
-          <ol className="flex flex-wrap items-center gap-1">
-            <li>
-              <Link href="/" className="inline-flex min-h-12 items-center hover:text-ink">
-                Home
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" className="text-ink">
-              {tool.name}
-            </li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ name: "Home", href: "/" }, { name: tool.name }]} />
 
         <header className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">{tool.category}</p>
@@ -79,7 +68,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
         <PhotoWorkspace preset={tool.preset} label={tool.name} />
 
-        <ToolGuide tool={tool} related={getRelatedTools(tool)} />
+        <ToolGuide tool={tool} related={getRelatedTools(tool)} guides={getGuidesForTool(tool.slug).slice(0, 4)} />
       </main>
     </>
   );

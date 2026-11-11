@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { ToolDefinition } from "@/lib/types";
+import type { GuideDefinition, ToolDefinition } from "@/lib/types";
+import { AdSlot } from "./AdSlot";
 
 const reviewedFormat = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
@@ -8,7 +9,15 @@ const reviewedFormat = new Intl.DateTimeFormat("en-US", { year: "numeric", month
  * step-by-step process, output specification, method/privacy notes and FAQ. Mirrors the HowTo + FAQPage JSON-LD so on-page text and structured data
  * always agree.
  */
-export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: readonly ToolDefinition[] }) {
+export function ToolGuide({
+  tool,
+  related,
+  guides,
+}: {
+  tool: ToolDefinition;
+  related: readonly ToolDefinition[];
+  guides: readonly GuideDefinition[];
+}) {
   const reviewed = reviewedFormat.format(new Date(`${tool.lastReviewed}T00:00:00Z`));
 
   return (
@@ -34,6 +43,8 @@ export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: re
           ))}
         </ol>
       </section>
+
+      <AdSlot />
 
       <section aria-labelledby="spec-heading">
         <h2 id="spec-heading" className="text-2xl font-bold tracking-tight text-ink">
@@ -104,6 +115,28 @@ export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: re
           ))}
         </div>
       </section>
+
+      {guides.length > 0 ? (
+        <section aria-labelledby="guides-heading">
+          <h2 id="guides-heading" className="text-2xl font-bold tracking-tight text-ink">
+            Learn more
+          </h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {guides.map((guide) => (
+              <li key={guide.slug}>
+                <Link
+                  href={`/guides/${guide.slug}`}
+                  className="flex min-h-12 flex-col rounded-2xl border border-line bg-panel p-4 transition-colors hover:border-brand-500"
+                >
+                  <span className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">Guide</span>
+                  <span className="mt-1 font-semibold text-ink">{guide.title}</span>
+                  <span className="mt-1 text-sm text-ink-soft">{guide.description}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {related.length > 0 ? (
         <section aria-labelledby="related-heading">

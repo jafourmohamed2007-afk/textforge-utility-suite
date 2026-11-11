@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   applicationName: siteConfig.fullName,
   formatDetection: { telephone: false, email: false, address: false },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
+  // AdSense site verification tag; only present once a publisher id is configured.
+  ...(siteConfig.adsenseClient ? { other: { "google-adsense-account": siteConfig.adsenseClient } } : {}),
 };
 
 export const viewport: Viewport = {
@@ -29,6 +31,16 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" dir="ltr">
+      <head>
+        {siteConfig.adsenseClient ? (
+          // Loaded async so it never blocks rendering. Enables Auto ads and manual <AdSlot> units.
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsenseClient}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
+      </head>
       <body className="flex min-h-dvh flex-col">
         <a
           href="#main"
