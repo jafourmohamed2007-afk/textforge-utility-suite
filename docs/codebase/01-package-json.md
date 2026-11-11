@@ -4,11 +4,11 @@ Dependencies and scripts (runtime deps: next, react, react-dom only).
 
 ```json
 {
-  "name": "textforge-dynamic-tool-suite",
+  "name": "fitkb-photo-resizer",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "TextForge Dynamic Tool Suite: zero-dependency, client-side text utilities on Next.js 15.",
+  "description": "FitKB: resize and compress photos to an exact KB limit, entirely in the browser. Next.js 15.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

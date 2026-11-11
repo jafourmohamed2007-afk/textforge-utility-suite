@@ -1,26 +1,20 @@
 # 07. `lib/types.ts`
 
-Serializable engine contracts (tool definitions, options, results).
+Serializable contracts: presets, options, page content.
 
 ```ts
 /**
- * Shared, serializable contracts for the TextForge engine.
+ * Shared, serializable contracts for FitKB.
  *
- * Everything in the registry must stay JSON-serializable so that it can be
- * passed from Server Components into the client workspace without functions.
- * Processing functions live in `lib/processors` and are resolved by slug on
- * the client.
+ * Registry entries must stay JSON-serializable so Server Components can pass
+ * them to the client workspace. All image work happens in the browser.
  */
 
 export type OptionValue = string | number | boolean;
-export type OptionValues = Record<string, OptionValue>;
 
 interface BaseOption {
-  /** Key used inside the OptionValues record handed to processors. */
   id: string;
-  /** Human-readable control label. */
   label: string;
-  /** Short helper text rendered under the control. */
   hint?: string;
 }
 
@@ -36,7 +30,6 @@ export interface RangeOption extends BaseOption {
   max: number;
   step: number;
   defaultValue: number;
-  /** Optional unit suffix shown next to the live value (e.g. "spaces"). */
   unit?: string;
 }
 
@@ -47,18 +40,37 @@ export interface ToggleOption extends BaseOption {
 
 export type ToolOption = SelectOption | RangeOption | ToggleOption;
 
+/**
+ * How the photo's pixel dimensions are decided.
+ *  - original: keep the photo's own dimensions (shrunk only if needed to hit the size limit)
+ *  - max:      fit inside width x height, never upscaled, aspect ratio kept
+ *  - cover:    exactly width x height, cropped to fill (passport photos)
+ *  - contain:  exactly width x height, whole image kept, padded with white (signatures)
+ */
+export type SizeMode = "original" | "max" | "cover" | "contain";
+
+export type OutputFormat = "jpeg" | "webp";
+
+export interface PresetSpec {
+  /** Upper size limit in KB. The engine stays at or under targetKB x 1000 bytes. */
+  targetKB: number;
+  mode: SizeMode;
+  /** Pixel width/height for max, cover and contain modes. */
+  width: number;
+  height: number;
+  format: OutputFormat;
+  /** Vertical crop position for cover mode, 0 = top, 100 = bottom. */
+  focusY: number;
+}
+
 export interface HowToStep {
   title: string;
   body: string;
 }
 
-export interface SyntaxRule {
-  /** What the user types / what is detected. */
-  pattern: string;
-  /** What TextForge produces. */
-  result: string;
-  /** Plain-language note. */
-  note: string;
+export interface SpecRow {
+  label: string;
+  value: string;
 }
 
 export interface FaqEntry {
@@ -74,39 +86,16 @@ export interface ToolDefinition {
   shortName: string;
   /** One-line value proposition (meta description). */
   tagline: string;
-  /** Longer intro paragraph rendered under the H1. */
+  /** Intro paragraph rendered under the H1. */
   intro: string;
-  category: "Messaging" | "Cleanup" | "Data" | "Markdown";
+  category: "Compress" | "Photo ID" | "Signature";
   keywords: readonly string[];
-  inputLabel: string;
-  outputLabel: string;
-  inputPlaceholder: string;
-  sampleInput: string;
-  /** File name used by the Download button. */
-  downloadName: string;
-  downloadMime: "text/plain" | "text/csv";
-  options: readonly ToolOption[];
+  preset: PresetSpec;
+  specs: readonly SpecRow[];
   howTo: readonly HowToStep[];
-  syntax: readonly SyntaxRule[];
   faq: readonly FaqEntry[];
   /** ISO date (YYYY-MM-DD) of the last editorial / logic review. */
   lastReviewed: string;
   relatedSlugs: readonly string[];
 }
-
-export interface ResultStat {
-  label: string;
-  value: string;
-}
-
-export interface ProcessResult {
-  output: string;
-  stats: ResultStat[];
-  /** Optional structured preview (used by the CSV converter). */
-  table?: string[][];
-  /** Non-fatal notice shown under the output panel. */
-  warning?: string;
-}
-
-export type Processor = (input: string, options: OptionValues) => ProcessResult;
 ```

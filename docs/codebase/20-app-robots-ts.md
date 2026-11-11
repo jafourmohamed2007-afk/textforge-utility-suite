@@ -1,4 +1,4 @@
-# 23. `app/robots.ts`
+# 20. `app/robots.ts`
 
 robots.txt.
 

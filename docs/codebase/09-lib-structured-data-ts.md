@@ -9,7 +9,7 @@ import { absoluteUrl, buildToolTitle, siteConfig } from "./site";
 type JsonLd = Record<string, unknown>;
 
 export function softwareApplicationSchema(tool: ToolDefinition): JsonLd {
-  const url = absoluteUrl(`/tools/${tool.slug}`);
+  const url = absoluteUrl(`/${tool.slug}`);
   return {
     "@type": "SoftwareApplication",
     "@id": `${url}#app`,
@@ -17,10 +17,10 @@ export function softwareApplicationSchema(tool: ToolDefinition): JsonLd {
     alternateName: buildToolTitle(tool.name),
     description: tool.tagline,
     url,
-    applicationCategory: "UtilitiesApplication",
+    applicationCategory: "MultimediaApplication",
     applicationSubCategory: tool.category,
     operatingSystem: "Any (web browser): Android, iOS, Windows, macOS, Linux",
-    browserRequirements: "Requires JavaScript. All processing runs locally in the browser.",
+    browserRequirements: "Requires JavaScript and Canvas. Photos are processed locally in the browser.",
     isAccessibleForFree: true,
     inLanguage: "en",
     dateModified: tool.lastReviewed,
@@ -39,17 +39,18 @@ export function softwareApplicationSchema(tool: ToolDefinition): JsonLd {
 export function howToSchema(tool: ToolDefinition): JsonLd {
   return {
     "@type": "HowTo",
-    "@id": `${absoluteUrl(`/tools/${tool.slug}`)}#howto`,
+    "@id": `${absoluteUrl(`/${tool.slug}`)}#howto`,
     name: `How to use the ${tool.name}`,
     description: tool.intro,
     totalTime: "PT1M",
+    supply: { "@type": "HowToSupply", name: "A photo (JPG, PNG or WebP)" },
     tool: { "@type": "HowToTool", name: tool.name },
     step: tool.howTo.map((step, index) => ({
       "@type": "HowToStep",
       position: index + 1,
       name: step.title,
       text: step.body,
-      url: `${absoluteUrl(`/tools/${tool.slug}`)}#step-${index + 1}`,
+      url: `${absoluteUrl(`/${tool.slug}`)}#step-${index + 1}`,
     })),
   };
 }
@@ -57,7 +58,7 @@ export function howToSchema(tool: ToolDefinition): JsonLd {
 export function faqSchema(tool: ToolDefinition): JsonLd {
   return {
     "@type": "FAQPage",
-    "@id": `${absoluteUrl(`/tools/${tool.slug}`)}#faq`,
+    "@id": `${absoluteUrl(`/${tool.slug}`)}#faq`,
     mainEntity: tool.faq.map((entry) => ({
       "@type": "Question",
       name: entry.question,
@@ -71,8 +72,7 @@ export function breadcrumbSchema(tool: ToolDefinition): JsonLd {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: siteConfig.name, item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Tools", item: absoluteUrl("/#tools") },
-      { "@type": "ListItem", position: 3, name: tool.name, item: absoluteUrl(`/tools/${tool.slug}`) },
+      { "@type": "ListItem", position: 2, name: tool.name, item: absoluteUrl(`/${tool.slug}`) },
     ],
   };
 }

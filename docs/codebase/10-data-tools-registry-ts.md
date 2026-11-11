@@ -1,490 +1,363 @@
 # 10. `data/tools-registry.ts`
 
-Static tool dictionary that powers every /tools/[slug] page.
+Preset dictionary that powers every /[slug] page.
 
-````ts
-import type { ToolDefinition } from "../lib/types";
+```ts
+import type { FaqEntry, HowToStep, PresetSpec, SpecRow, ToolDefinition } from "../lib/types";
 
 /**
- * Static tool dictionary. Every entry generates:
- *   - a statically pre-rendered page at /tools/[slug]
+ * Static preset dictionary. Every entry generates:
+ *   - a statically pre-rendered page at /[slug]
  *   - <title>, meta description, canonical, Open Graph and Twitter tags
  *   - SoftwareApplication, HowTo, FAQPage and BreadcrumbList JSON-LD
  *   - a sitemap.xml entry
  * Entries must remain JSON-serializable (no functions).
  */
+
+const LAST_REVIEWED = "2026-11-11";
+
+const sharedFaq: readonly FaqEntry[] = [
+  {
+    question: "Are my photos uploaded to a server?",
+    answer:
+      "No. The photo is decoded, resized and compressed inside your browser with the Canvas API. Nothing is uploaded, so ID photos and signatures never leave your phone or computer.",
+  },
+  {
+    question: "Why is the result a little under the KB limit instead of exactly on it?",
+    answer:
+      "Upload forms reject files that are even one byte over the limit, and some count 1 KB as 1000 bytes while others use 1024. FitKB stays at or under the limit times 1000 bytes, which passes both checks, and picks the highest quality that fits.",
+  },
+  {
+    question: "Can I use photos from an iPhone (HEIC)?",
+    answer:
+      "Yes in Safari, and when you pick a photo through the iPhone photo picker it is usually converted to JPG automatically. If another browser cannot open a HEIC file, export it as JPG (Share, then Save as JPEG) and try again.",
+  },
+];
+
+function compressSteps(kb: number): readonly HowToStep[] {
+  return [
+    {
+      title: "Choose your photo",
+      body: "Tap the upload area to pick a photo from your gallery or camera, drag a file onto it, or paste an image. JPG, PNG and WebP all work.",
+    },
+    {
+      title: `Keep ${kb} KB as the limit`,
+      body: `The size limit is already set to ${kb} KB. Change it if your form asks for something else. You can also cap the width and height.`,
+    },
+    {
+      title: "Let FitKB find the best quality",
+      body: "The tool re-encodes the photo several times in your browser and keeps the sharpest version that is still under the limit. It only shrinks the dimensions when quality alone is not enough.",
+    },
+    {
+      title: "Check and download",
+      body: "Compare the before and after sizes, zoom into the preview, then tap Download. The file name includes the limit so you can find it in your downloads.",
+    },
+  ];
+}
+
+function compressPreset(targetKB: number): PresetSpec {
+  return { targetKB, mode: "original", width: 1600, height: 1600, format: "jpeg", focusY: 50 };
+}
+
+function compressSpecs(kb: number, typical: string): readonly SpecRow[] {
+  return [
+    { label: "Size limit", value: `${kb} KB or less (${(kb * 1000).toLocaleString("en-US")} bytes)` },
+    { label: "Output format", value: "JPEG (WebP optional)" },
+    { label: "Dimensions", value: "Original, shrunk only if needed" },
+    { label: "Typical result", value: typical },
+    { label: "Processing", value: "In your browser, nothing uploaded" },
+  ];
+}
+
 export const toolsRegistry = [
   {
-    slug: "whatsapp-text-formatter",
-    name: "WhatsApp Text Formatter",
-    shortName: "WhatsApp Formatter",
-    tagline:
-      "Turn plain text into WhatsApp bold, italic, strikethrough, monospace, quotes and lists instantly. Free, private and built for one-thumb use on mobile.",
+    slug: "compress-image-to-20kb",
+    name: "Compress Image to 20KB",
+    shortName: "20 KB",
+    tagline: "Reduce any photo to 20 KB or less in seconds, right on your phone. No upload, no sign-up, no watermark.",
     intro:
-      "Paste any message and choose a style. TextForge wraps every line in the exact markers WhatsApp understands, moves stray spaces outside the markers so formatting never breaks, and can translate Markdown (**bold**, ~~strike~~, # headings) into WhatsApp syntax.",
-    category: "Messaging",
-    keywords: [
-      "whatsapp text formatter",
-      "whatsapp bold text",
-      "whatsapp italic generator",
-      "whatsapp strikethrough",
-      "whatsapp monospace font",
-      "markdown to whatsapp",
-    ],
-    inputLabel: "Plain text",
-    outputLabel: "WhatsApp-ready text",
-    inputPlaceholder: "Type or paste the message you want to format…",
-    sampleInput:
-      "Team update for Friday\n  Launch moved to 10:00  \nBring your laptop\n\nOld venue: Room 4B\nQuestions? Reply here",
-    downloadName: "whatsapp-message.txt",
-    downloadMime: "text/plain",
-    options: [
-      {
-        id: "style",
-        type: "select",
-        label: "Format style",
-        defaultValue: "bold",
-        choices: [
-          { value: "bold", label: "Bold  *text*" },
-          { value: "italic", label: "Italic  _text_" },
-          { value: "strikethrough", label: "Strikethrough  ~text~" },
-          { value: "bold-italic", label: "Bold italic  *_text_*" },
-          { value: "monospace", label: "Monospace block  ```text```" },
-          { value: "inline-code", label: "Inline code  `text`" },
-          { value: "quote", label: "Quote  > text" },
-          { value: "bullet", label: "Bulleted list  - text" },
-          { value: "numbered", label: "Numbered list  1. text" },
-          { value: "markdown", label: "Convert Markdown → WhatsApp" },
-        ],
-      },
-      {
-        id: "stripExisting",
-        type: "toggle",
-        label: "Remove existing markers first",
-        hint: "Prevents doubled symbols such as **text** when re-formatting.",
-        defaultValue: true,
-      },
-    ],
-    howTo: [
-      {
-        title: "Paste your message",
-        body: "Tap Paste (or type) in the input panel. Multi-line messages are supported; each line is formatted independently because WhatsApp markers stop at line breaks.",
-      },
-      {
-        title: "Pick a format style",
-        body: "Choose bold, italic, strikethrough, bold italic, monospace, inline code, quote, bulleted list, numbered list, or Markdown conversion. The output updates on every keystroke.",
-      },
-      {
-        title: "Check the whitespace handling",
-        body: "WhatsApp ignores a marker that touches a space (\"* text *\" stays plain). TextForge trims the inside of each marker and keeps your indentation outside it, so the result always renders.",
-      },
-      {
-        title: "Copy and send",
-        body: "Tap Copy, switch to WhatsApp and paste. The markers convert to real formatting as soon as the message is sent or previewed.",
-      },
-    ],
-    syntax: [
-      { pattern: "Hello", result: "*Hello*", note: "Bold: a single asterisk on each side." },
-      { pattern: "Hello", result: "_Hello_", note: "Italic: a single underscore on each side." },
-      { pattern: "Hello", result: "~Hello~", note: "Strikethrough: a single tilde on each side." },
-      { pattern: "Hello", result: "```Hello```", note: "Monospace: three backticks, spans multiple lines." },
-      { pattern: "Hello", result: "`Hello`", note: "Inline code: one backtick, single line only." },
-      { pattern: "**Hello**", result: "*Hello*", note: "Markdown mode: double asterisks become WhatsApp bold." },
-      { pattern: "*Hello*", result: "_Hello_", note: "Markdown mode: Markdown italic becomes WhatsApp italic." },
-      { pattern: "# Title", result: "*Title*", note: "Markdown mode: headings become bold lines." },
-    ],
+      "Application portals for exams, jobs and government services often reject photos above 20 KB. Choose your photo and FitKB finds the sharpest version that fits under 20 KB, shrinking the dimensions only when it has to.",
+    category: "Compress",
+    keywords: ["compress image to 20kb", "reduce photo size to 20kb", "image resize 20kb", "20kb photo converter", "jpg to 20kb"],
+    preset: compressPreset(20),
+    specs: compressSpecs(20, "About 300 to 500 px wide for a normal photo"),
+    howTo: compressSteps(20),
     faq: [
       {
-        question: "Why does my WhatsApp bold text show asterisks instead of bold?",
+        question: "How small will my photo be at 20 KB?",
         answer:
-          "WhatsApp only applies formatting when the marker is directly attached to a non-space character on both sides and the whole span sits on one line. \"* hello *\" or a span that crosses a line break stays literal. This formatter trims spaces inside each marker and wraps every line separately to avoid that problem.",
+          "A detailed camera photo usually ends up around 300 to 500 pixels wide at 20 KB. That is enough for a form thumbnail or ID photo. Plain backgrounds compress better, so a passport-style photo stays sharper than a busy landscape.",
       },
       {
-        question: "Can I combine bold and italic in WhatsApp?",
-        answer: "Yes. Nest the markers: *_text_* renders as bold italic. Select the \"Bold italic\" style to generate it automatically.",
-      },
-      {
-        question: "Is my message uploaded anywhere?",
+        question: "My form needs between 10 KB and 20 KB. Will this work?",
         answer:
-          "No. All formatting runs in your browser with JavaScript string functions. Nothing is sent to a server, logged or stored, so it is safe for private conversations.",
+          "Usually yes. FitKB aims for the highest quality under 20 KB, so results normally land just below the limit, well above 10 KB. The exact size is shown under the preview before you download.",
       },
-      {
-        question: "Does the formatting work in WhatsApp Business and WhatsApp Web?",
-        answer:
-          "Yes. Bold, italic, strikethrough and monospace are supported in WhatsApp, WhatsApp Business, WhatsApp Web and the desktop apps. Lists, quotes and inline code are supported in current app versions.",
-      },
+      ...sharedFaq,
     ],
-    lastReviewed: "2026-11-10",
-    relatedSlugs: ["markdown-to-clean-text-stripper", "bulk-whitespace-cleaner"],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-50kb", "compress-image-to-10kb", "passport-size-photo-35x45mm"],
   },
   {
-    slug: "bulk-whitespace-cleaner",
-    name: "Bulk Whitespace Cleaner",
-    shortName: "Whitespace Cleaner",
-    tagline:
-      "Strip trailing spaces, convert or remove tab indentation, collapse triple line breaks and delete invisible characters from any text in one tap.",
+    slug: "compress-image-to-50kb",
+    name: "Compress Image to 50KB",
+    shortName: "50 KB",
+    tagline: "Shrink JPG, PNG or WebP photos to 50 KB or less without losing more quality than you have to. Free and private.",
     intro:
-      "Copying from PDFs, emails, spreadsheets and chat apps leaves behind trailing spaces, mixed tabs, non-breaking spaces and runs of empty lines. The Bulk Whitespace Cleaner normalises all of it while preserving the structure you actually want.",
-    category: "Cleanup",
-    keywords: [
-      "remove trailing spaces",
-      "whitespace cleaner online",
-      "remove extra line breaks",
-      "remove tabs from text",
-      "collapse blank lines",
-      "remove non breaking spaces",
-    ],
-    inputLabel: "Messy text",
-    outputLabel: "Cleaned text",
-    inputPlaceholder: "Paste text with extra spaces, tabs or blank lines…",
-    sampleInput:
-      "\t\tQuarterly report   \n\t\tPrepared by the data team\t\n\n\n\n\t\t\tRevenue    grew   12%\u00A0this quarter.   \n\n\n\t\t\tCosts were flat.\u200B\n\n\n\n",
-    downloadName: "cleaned-text.txt",
-    downloadMime: "text/plain",
-    options: [
-      {
-        id: "maxBlankLines",
-        type: "range",
-        label: "Max blank lines in a row",
-        hint: "1 keeps paragraphs separated; 0 joins every line.",
-        min: 0,
-        max: 3,
-        step: 1,
-        defaultValue: 1,
-        unit: "lines",
-      },
-      {
-        id: "tabWidth",
-        type: "range",
-        label: "Tab width",
-        hint: "Each tab becomes this many spaces. 0 deletes tabs.",
-        min: 0,
-        max: 8,
-        step: 1,
-        defaultValue: 2,
-        unit: "spaces",
-      },
-      {
-        id: "dedent",
-        type: "toggle",
-        label: "Remove shared indentation",
-        hint: "Shifts the whole block left while keeping relative nesting.",
-        defaultValue: true,
-      },
-      {
-        id: "stripIndent",
-        type: "toggle",
-        label: "Remove all indentation",
-        defaultValue: false,
-      },
-      {
-        id: "collapseSpaces",
-        type: "toggle",
-        label: "Collapse repeated spaces",
-        defaultValue: true,
-      },
-      {
-        id: "removeInvisible",
-        type: "toggle",
-        label: "Fix invisible characters",
-        hint: "Zero-width spaces, BOM, soft hyphens and non-breaking spaces.",
-        defaultValue: true,
-      },
-      {
-        id: "trimEdges",
-        type: "toggle",
-        label: "Trim blank lines at start and end",
-        defaultValue: true,
-      },
-    ],
-    howTo: [
-      {
-        title: "Paste the messy text",
-        body: "Drop in anything: code copied from a web page, a PDF extract, an email thread or a spreadsheet column. Line endings from Windows (CRLF) and old Mac files (CR) are normalised to LF automatically.",
-      },
-      {
-        title: "Set paragraph spacing",
-        body: "Drag the \"Max blank lines\" slider. The default of 1 collapses triple and quadruple breaks into a single empty line between paragraphs.",
-      },
-      {
-        title: "Decide how to treat indentation",
-        body: "Tabs are expanded to the chosen width. \"Remove shared indentation\" shifts the block left without flattening nested lines; \"Remove all indentation\" flattens everything.",
-      },
-      {
-        title: "Review the stats and copy",
-        body: "The counters show how many trailing spaces, tabs, blank lines and invisible characters were fixed. Tap Copy or Download to take the clean result with you.",
-      },
-    ],
-    syntax: [
-      { pattern: "text···⏎", result: "text⏎", note: "Trailing spaces and tabs are removed from every line." },
-      { pattern: "⇥⇥item", result: "item", note: "Shared tab indentation is expanded, then removed." },
-      { pattern: "a···b", result: "a b", note: "Runs of spaces inside a line collapse to one." },
-      { pattern: "¶ ⏎⏎⏎⏎ ¶", result: "¶ ⏎⏎ ¶", note: "Three or more line breaks shrink to the slider limit." },
-      { pattern: "U+00A0 (NBSP)", result: "U+0020", note: "Non-breaking and typographic spaces become normal spaces." },
-      { pattern: "U+200B / U+FEFF", result: "(removed)", note: "Zero-width spaces and byte-order marks are deleted." },
-    ],
+      "50 KB is one of the most common upload limits for application photos and profile pictures. FitKB re-encodes your photo in the browser and keeps the best-looking version that stays under 50 KB.",
+    category: "Compress",
+    keywords: ["compress image to 50kb", "reduce image size to 50kb", "photo 50kb converter", "jpg to 50kb", "resize image 50kb online"],
+    preset: compressPreset(50),
+    specs: compressSpecs(50, "About 500 to 800 px wide for a normal photo"),
+    howTo: compressSteps(50),
     faq: [
       {
-        question: "Will cleaning whitespace break emoji or non-Latin text?",
+        question: "Will 50 KB look blurry?",
         answer:
-          "No. The cleaner deliberately keeps the zero-width joiner (U+200D) and non-joiner (U+200C), which are required for emoji sequences and scripts such as Persian and Hindi. Only characters that are never meaningful in plain text are removed.",
+          "Not for typical form and profile use. At 50 KB most photos keep 500 to 800 pixels on the long side with clean detail. Zoom into the preview before downloading to check faces and text.",
       },
       {
-        question: "Is it safe for source code?",
+        question: "Can I convert a PNG to a 50 KB JPG?",
         answer:
-          "Yes, with \"Collapse repeated spaces\" turned off if you rely on aligned columns. Relative indentation is preserved when \"Remove shared indentation\" is on, so Python and YAML nesting survives.",
+          "Yes. PNG files are converted to JPEG, which is far smaller for photos. Transparent areas become white, which is what upload forms expect.",
       },
-      {
-        question: "How large can the text be?",
-        answer:
-          "The cleaner runs locally and handles several megabytes comfortably on a modern phone. Processing is deferred while you type so the editor never freezes.",
-      },
-      {
-        question: "What counts as a blank line?",
-        answer: "Any line that contains only spaces, tabs or invisible characters. These are emptied first and then counted toward the blank-line limit.",
-      },
+      ...sharedFaq,
     ],
-    lastReviewed: "2026-11-10",
-    relatedSlugs: ["markdown-to-clean-text-stripper", "raw-text-to-csv-converter"],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-20kb", "compress-image-to-100kb", "signature-resize-20kb"],
   },
   {
-    slug: "raw-text-to-csv-converter",
-    name: "Raw Text to CSV Converter",
-    shortName: "Text to CSV",
-    tagline:
-      "Convert comma, tab, semicolon, pipe or space-aligned text into a clean, correctly quoted CSV table with a live preview. Auto-detects the delimiter.",
+    slug: "compress-image-to-100kb",
+    name: "Compress Image to 100KB",
+    shortName: "100 KB",
+    tagline: "Get any image under 100 KB for forms, email and websites. Runs in your browser with no upload.",
     intro:
-      "Paste rows copied from a spreadsheet, a terminal, a Markdown table or a log file. The converter detects the delimiter, respects quoted fields, pads ragged rows and outputs RFC 4180 compliant CSV that opens cleanly in Excel, Google Sheets and Numbers.",
-    category: "Data",
-    keywords: [
-      "text to csv converter",
-      "tab delimited to csv",
-      "convert text to csv online",
-      "markdown table to csv",
-      "semicolon to comma csv",
-      "csv cleaner",
-    ],
-    inputLabel: "Raw delimited text",
-    outputLabel: "Clean CSV",
-    inputPlaceholder: "Paste rows separated by commas, tabs, semicolons, pipes or spaces…",
-    sampleInput:
-      "Name\tCity\tRole\tStart date\n Ada Lovelace \tLondon\tAnalyst\t1843-07-01\nGrace Hopper\tNew York, NY\tEngineer\t1944-03-15\nAlan Turing\tManchester\t\t1948-10-01\n\nKatherine Johnson\tHampton\tMathematician",
-    downloadName: "converted.csv",
-    downloadMime: "text/csv",
-    options: [
-      {
-        id: "delimiter",
-        type: "select",
-        label: "Input delimiter",
-        defaultValue: "auto",
-        choices: [
-          { value: "auto", label: "Auto-detect" },
-          { value: "comma", label: "Comma ," },
-          { value: "tab", label: "Tab ⇥" },
-          { value: "semicolon", label: "Semicolon ;" },
-          { value: "pipe", label: "Pipe | (Markdown tables)" },
-          { value: "spaces", label: "2+ spaces (aligned columns)" },
-        ],
-      },
-      {
-        id: "outputDelimiter",
-        type: "select",
-        label: "Output separator",
-        defaultValue: "comma",
-        choices: [
-          { value: "comma", label: "Comma (standard CSV)" },
-          { value: "semicolon", label: "Semicolon (European Excel)" },
-          { value: "tab", label: "Tab (TSV)" },
-        ],
-      },
-      {
-        id: "quoting",
-        type: "select",
-        label: "Quoting",
-        defaultValue: "minimal",
-        choices: [
-          { value: "minimal", label: "Only when needed" },
-          { value: "all", label: "Quote every field" },
-        ],
-      },
-      { id: "trimCells", type: "toggle", label: "Trim spaces in cells", defaultValue: true },
-      { id: "skipEmptyRows", type: "toggle", label: "Skip empty rows", defaultValue: true },
-      {
-        id: "padRows",
-        type: "toggle",
-        label: "Pad short rows",
-        hint: "Adds empty cells so every row has the same column count.",
-        defaultValue: true,
-      },
-      {
-        id: "formulaGuard",
-        type: "toggle",
-        label: "Neutralise spreadsheet formulas",
-        hint: "Prefixes cells starting with = + - @ with ' to block CSV injection.",
-        defaultValue: false,
-      },
-    ],
-    howTo: [
-      {
-        title: "Paste the raw rows",
-        body: "Copy a range from a spreadsheet (tab separated), a Markdown table, a semicolon export or column-aligned terminal output and paste it into the input panel.",
-      },
-      {
-        title: "Confirm the delimiter",
-        body: "Auto-detect scores each candidate delimiter by how consistently it splits the first 25 lines. The detected delimiter is shown in the stats bar; override it from the menu if needed.",
-      },
-      {
-        title: "Tidy the table",
-        body: "Trim cells, skip empty rows and pad short rows so every row has the same column count. Check the live table preview below the output.",
-      },
-      {
-        title: "Export",
-        body: "Copy the CSV or tap Download to save a .csv file. Fields containing the separator, quotes or line breaks are wrapped in double quotes and inner quotes are doubled, exactly as RFC 4180 requires.",
-      },
-    ],
-    syntax: [
-      { pattern: "a⇥b⇥c", result: "a,b,c", note: "Tab-separated rows (spreadsheet copy) become comma-separated." },
-      { pattern: "New York, NY", result: "\"New York, NY\"", note: "Fields containing the separator are quoted." },
-      { pattern: "5\" screen", result: "\"5\"\" screen\"", note: "Inner double quotes are escaped by doubling them." },
-      { pattern: "| a | b |", result: "a,b", note: "Markdown table pipes and |---| separator rows are removed." },
-      { pattern: "a;b;c", result: "a,b,c", note: "Semicolon exports from European locales are normalised." },
-      { pattern: "=SUM(A1)", result: "'=SUM(A1)", note: "Optional formula guard prevents CSV injection." },
-    ],
+      "100 KB keeps a photo sharp enough for most uses while passing typical upload limits. FitKB lowers JPEG quality step by step and only reduces the dimensions if quality alone cannot reach 100 KB.",
+    category: "Compress",
+    keywords: ["compress image to 100kb", "reduce image size to 100kb", "jpg to 100kb", "image compressor 100kb", "photo size 100kb"],
+    preset: compressPreset(100),
+    specs: compressSpecs(100, "About 800 to 1200 px wide for a normal photo"),
+    howTo: compressSteps(100),
     faq: [
       {
-        question: "How does delimiter auto-detection work?",
+        question: "Is 100 KB good enough for printing?",
         answer:
-          "For each candidate (tab, comma, semicolon, pipe) TextForge counts occurrences outside quotes on the first 25 non-empty lines, finds the most common count, and prefers the delimiter that splits every line the same way. If none fits, two or more consecutive spaces are treated as column gaps.",
+          "For a small print such as an ID card photo, yes. For anything larger than a postcard, keep the original file. A 100 KB JPEG is meant for uploads and screens.",
       },
       {
-        question: "Why does Excel put everything in one column?",
+        question: "Why did my 90 KB photo change at all?",
         answer:
-          "Excel in many European locales expects semicolons. Set \"Output separator\" to Semicolon and the file will open with columns split correctly.",
+          "Every photo is re-encoded so EXIF data such as GPS location is removed and the orientation is fixed. If the original is already small, the result is a clean JPEG of similar size.",
       },
-      {
-        question: "Are quoted fields with commas or line breaks supported?",
-        answer:
-          "Yes. The parser follows RFC 4180: a field that starts with a double quote can contain the delimiter, line breaks and escaped quotes (\"\") until the closing quote.",
-      },
-      {
-        question: "Is my data uploaded?",
-        answer: "No. Parsing and conversion run entirely in your browser. Customer lists and financial data never leave your device.",
-      },
+      ...sharedFaq,
     ],
-    lastReviewed: "2026-11-10",
-    relatedSlugs: ["bulk-whitespace-cleaner", "markdown-to-clean-text-stripper"],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-50kb", "compress-image-to-200kb", "us-passport-photo-2x2"],
   },
   {
-    slug: "markdown-to-clean-text-stripper",
-    name: "Markdown to Clean Text Stripper",
-    shortName: "Markdown Stripper",
-    tagline:
-      "Remove Markdown syntax — headings, bold, links, images, code blocks, tables and HTML — and get clean, readable plain text instantly.",
+    slug: "compress-image-to-200kb",
+    name: "Compress Image to 200KB",
+    shortName: "200 KB",
+    tagline: "Compress large phone photos to 200 KB or less while keeping them sharp. Private, free and mobile friendly.",
     intro:
-      "Ideal for turning README files, AI chat answers, Notion or Obsidian notes into text you can paste into emails, forms, CMS fields or social posts. Choose how code blocks, links and lists are handled; everything else is cleaned automatically.",
-    category: "Markdown",
-    keywords: [
-      "markdown to plain text",
-      "remove markdown formatting",
-      "strip markdown online",
-      "convert chatgpt markdown to text",
-      "remove asterisks from text",
-      "markdown cleaner",
+      "Modern phone cameras produce 3 to 10 MB photos. FitKB brings them under 200 KB for job portals, marketplaces and email, usually without changing the dimensions you can see on screen.",
+    category: "Compress",
+    keywords: ["compress image to 200kb", "reduce photo to 200kb", "jpg to 200kb", "image size reducer 200kb", "compress jpeg 200kb"],
+    preset: compressPreset(200),
+    specs: compressSpecs(200, "About 1200 to 1800 px wide for a normal photo"),
+    howTo: compressSteps(200),
+    faq: [
+      {
+        question: "How long does it take?",
+        answer:
+          "Usually one to three seconds on a phone. Very large photos take longer because the browser encodes them several times to find the best quality under the limit.",
+      },
+      {
+        question: "Does it remove location data?",
+        answer: "Yes. The new file is drawn from pixels only, so EXIF metadata such as GPS coordinates and camera details is not copied.",
+      },
+      ...sharedFaq,
     ],
-    inputLabel: "Markdown",
-    outputLabel: "Plain text",
-    inputPlaceholder: "Paste Markdown from a README, AI chat or notes app…",
-    sampleInput:
-      "---\ntitle: Release notes\n---\n# Release 2.4 🚀\n\nThis update makes **exports 3× faster** and fixes _several_ bugs. See the [changelog](https://example.com/changelog).\n\n## Highlights\n\n- [x] New `--fast` flag\n- ~~Legacy mode~~ removed\n* Works with <kbd>Ctrl</kbd> + <kbd>C</kbd>\n\n> **Note:** restart the app after updating. #release #devtools\n\n```bash\nnpm install textforge@latest\n```\n\n| Feature | Status |\n|---------|--------|\n| Export  | Faster |\n\n![Diagram](https://example.com/diagram.png)",
-    downloadName: "plain-text.txt",
-    downloadMime: "text/plain",
-    options: [
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-100kb", "compress-image-to-50kb", "compress-image-to-20kb"],
+  },
+  {
+    slug: "compress-image-to-10kb",
+    name: "Compress Image to 10KB",
+    shortName: "10 KB",
+    tagline: "Make a photo or scan 10 KB or smaller for strict upload limits. Works on any phone, nothing is uploaded.",
+    intro:
+      "Some application systems allow only 10 KB for a photo or thumb impression. FitKB keeps the face or mark readable by lowering quality first, then shrinking dimensions just enough to pass.",
+    category: "Compress",
+    keywords: ["compress image to 10kb", "reduce photo size to 10kb", "10kb photo resize", "jpg to 10kb", "image 10kb converter"],
+    preset: compressPreset(10),
+    specs: compressSpecs(10, "About 200 to 350 px wide for a normal photo"),
+    howTo: compressSteps(10),
+    faq: [
       {
-        id: "codeBlocks",
-        type: "select",
-        label: "Fenced code blocks",
-        defaultValue: "remove",
-        choices: [
-          { value: "remove", label: "Remove entirely" },
-          { value: "keep", label: "Keep code, drop fences" },
-        ],
+        question: "How can I keep a 10 KB photo readable?",
+        answer:
+          "Crop tightly before uploading so the face or signature fills the frame, and use a plain background. Fewer details means more of the 10 KB goes to what matters.",
       },
       {
-        id: "links",
-        type: "select",
-        label: "Links",
-        defaultValue: "text",
-        choices: [
-          { value: "text", label: "Keep link text" },
-          { value: "text-url", label: "Text (URL)" },
-          { value: "url", label: "URL only" },
-        ],
+        question: "The result says it could not fit. What now?",
+        answer:
+          "This happens only with locked dimensions. Switch Dimensions to Keep original or Fit inside a box so FitKB is allowed to shrink the photo, or raise the size limit.",
       },
-      {
-        id: "listMarkers",
-        type: "select",
-        label: "Bullet lists",
-        defaultValue: "remove",
-        choices: [
-          { value: "remove", label: "Remove markers" },
-          { value: "bullet", label: "Convert to •" },
-        ],
-      },
-      { id: "removeHashtags", type: "toggle", label: "Remove #hashtags", defaultValue: false },
-      { id: "stripHtml", type: "toggle", label: "Remove HTML tags", defaultValue: true },
-      { id: "collapseBlank", type: "toggle", label: "Collapse extra blank lines", defaultValue: true },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["compress-image-to-20kb", "signature-resize-20kb", "passport-size-photo-35x45mm"],
+  },
+  {
+    slug: "passport-size-photo-35x45mm",
+    name: "Passport Size Photo Maker 35x45mm",
+    shortName: "35×45 mm",
+    tagline: "Crop and compress a photo to the 35×45 mm passport size (413×531 px at 300 DPI) under 50 KB, on your phone.",
+    intro:
+      "35×45 mm is the most widely used passport and visa photo size, used for example for UK passports and Schengen visas. FitKB crops your photo to that shape at 300 DPI and keeps the file under your size limit. Always check the official rules of the form you are filling.",
+    category: "Photo ID",
+    keywords: ["passport size photo 35x45", "35x45 mm photo online", "passport photo maker", "passport size photo kb", "visa photo resize"],
+    preset: { targetKB: 50, mode: "cover", width: 413, height: 531, format: "jpeg", focusY: 30 },
+    specs: [
+      { label: "Print size", value: "35 × 45 mm" },
+      { label: "Pixel size", value: "413 × 531 px (300 DPI)" },
+      { label: "Size limit", value: "50 KB by default, adjustable" },
+      { label: "Crop", value: "Fills the frame, framing adjustable" },
+      { label: "Background", value: "Kept as photographed; use a plain light wall" },
     ],
     howTo: [
       {
-        title: "Paste Markdown",
-        body: "Paste a README, a ChatGPT or Claude answer, or notes exported from Obsidian, Notion or GitHub. YAML front matter at the top is detected and removed.",
+        title: "Take a plain photo",
+        body: "Stand in front of a plain light wall in even light, face the camera, keep a neutral expression and leave space above your head.",
       },
       {
-        title: "Choose what to keep",
-        body: "Decide whether fenced code blocks disappear or keep their content, whether links become their text or include the URL, and whether bullet points become • symbols.",
+        title: "Upload it",
+        body: "Tap the upload area and choose the photo. FitKB crops it to the 35×45 mm shape at 300 DPI (413×531 pixels).",
       },
       {
-        title: "Let the stripper clean inline syntax",
-        body: "Headings (#), emphasis (* _ **), strikethrough (~~), inline code, images, footnotes, blockquotes, table pipes, escapes and HTML entities are converted to their readable text.",
+        title: "Adjust the framing",
+        body: "Use the Vertical framing slider to move the crop up or down until your head and the top of your shoulders sit in the frame.",
       },
       {
-        title: "Copy the plain text",
-        body: "Tap Copy and paste into any field that does not render Markdown. Paragraph spacing is preserved, so the text stays readable.",
+        title: "Match the form's KB limit and download",
+        body: "Set the size limit your form states (50 KB is the default), check the preview and tap Download.",
       },
-    ],
-    syntax: [
-      { pattern: "## Heading", result: "Heading", note: "ATX heading hashes are removed; setext underlines are dropped." },
-      { pattern: "**bold** _italic_", result: "bold italic", note: "Emphasis markers are removed; snake_case words are left alone." },
-      { pattern: "[docs](https://x.y)", result: "docs", note: "Links keep their label (or label and URL, by option)." },
-      { pattern: "![alt](img.png)", result: "alt", note: "Images are replaced by their alt text." },
-      { pattern: "`code`", result: "code", note: "Inline code keeps its literal content." },
-      { pattern: "```…```", result: "(removed)", note: "Fenced code blocks are removed or unwrapped by option." },
-      { pattern: "| a | b |", result: "a⇥b", note: "Table rows become tab-separated text; separators are dropped." },
-      { pattern: "&amp; \\*", result: "& *", note: "HTML entities are decoded and backslash escapes are honoured." },
     ],
     faq: [
       {
-        question: "How do I remove the asterisks and hashtags from ChatGPT answers?",
+        question: "Does this check biometric rules like head size?",
         answer:
-          "Paste the answer here. Headings lose their # symbols, bold and italic lose their asterisks and underscores, and lists lose their markers. Turn on \"Remove #hashtags\" to also delete social-style #tags from the text.",
+          "No. FitKB crops, sizes and compresses the photo, but it does not measure head position, lighting or expression. Follow the official photo guidance of the issuing authority.",
       },
       {
-        question: "Will it damage words like file_name or 2*3*4?",
-        answer:
-          "No. Underscore emphasis is only removed when the underscores sit at word boundaries, and asterisk emphasis requires a non-space character on both inner sides, so identifiers and simple maths stay intact.",
+        question: "Why 413 × 531 pixels?",
+        answer: "35 mm and 45 mm converted at 300 dots per inch give 413 × 531 pixels, a standard print resolution for photo prints.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["us-passport-photo-2x2", "signature-resize-20kb", "compress-image-to-20kb"],
+  },
+  {
+    slug: "us-passport-photo-2x2",
+    name: "2x2 Inch Passport Photo Maker",
+    shortName: "2×2 inch",
+    tagline: "Crop any photo to a square 2×2 inch (600×600 px) passport photo and keep it under 240 KB. Free, on your phone.",
+    intro:
+      "The United States uses a square 2×2 inch passport photo. FitKB crops your photo to a 600×600 pixel square, the digital size often requested for online applications, and compresses it under your size limit.",
+    category: "Photo ID",
+    keywords: ["2x2 passport photo", "us passport photo online", "600x600 photo converter", "2x2 photo maker", "passport photo 2x2 inch"],
+    preset: { targetKB: 240, mode: "cover", width: 600, height: 600, format: "jpeg", focusY: 30 },
+    specs: [
+      { label: "Print size", value: "2 × 2 in (51 × 51 mm)" },
+      { label: "Pixel size", value: "600 × 600 px" },
+      { label: "Size limit", value: "240 KB by default, adjustable" },
+      { label: "Crop", value: "Square, framing adjustable" },
+      { label: "Background", value: "Kept as photographed; use a plain white or off-white wall" },
+    ],
+    howTo: [
+      {
+        title: "Take the photo",
+        body: "Use a plain white or off-white background, even lighting and a straight-on, neutral expression. Remove glasses.",
       },
       {
-        question: "Does it support GitHub Flavored Markdown?",
-        answer:
-          "Yes: tables, task lists, strikethrough, autolinks, footnotes and fenced code blocks with ``` or ~~~ are all handled, along with inline HTML.",
+        title: "Upload it",
+        body: "Tap the upload area and choose the photo. FitKB crops it to a 600×600 pixel square.",
       },
       {
-        question: "Is anything sent to a server?",
-        answer: "No. Stripping runs locally in your browser using JavaScript regular expressions, so private notes stay on your device.",
+        title: "Frame your head",
+        body: "Move the Vertical framing slider until your whole head and the top of your shoulders are centred in the square.",
+      },
+      {
+        title: "Download",
+        body: "Keep the 240 KB limit or set the one your application asks for, then tap Download.",
       },
     ],
-    lastReviewed: "2026-11-10",
-    relatedSlugs: ["whatsapp-text-formatter", "bulk-whitespace-cleaner"],
+    faq: [
+      {
+        question: "Is 600 × 600 pixels accepted?",
+        answer:
+          "Many online systems ask for a square digital photo of at least 600 × 600 pixels. Requirements differ between applications, so confirm the dimensions and file size on the official site before submitting.",
+      },
+      {
+        question: "Can I print this photo?",
+        answer: "Yes. 600 × 600 pixels prints at 2 × 2 inches at 300 DPI. Print it on photo paper at its actual size, without scaling.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["passport-size-photo-35x45mm", "compress-image-to-100kb", "signature-resize-20kb"],
+  },
+  {
+    slug: "signature-resize-20kb",
+    name: "Signature Resize to 20KB",
+    shortName: "Signature",
+    tagline: "Turn a photo of your signature into a clean 400×160 px image under 20 KB for online forms. Nothing is uploaded.",
+    intro:
+      "Online applications often ask for a scanned signature in a wide box under 20 KB. FitKB fits your signature photo into a 400×160 pixel white canvas without cropping it, then compresses it under the limit.",
+    category: "Signature",
+    keywords: ["signature resize 20kb", "signature photo resize", "resize signature online", "signature 20kb converter", "signature image size"],
+    preset: { targetKB: 20, mode: "contain", width: 400, height: 160, format: "jpeg", focusY: 50 },
+    specs: [
+      { label: "Canvas", value: "400 × 160 px, white padding" },
+      { label: "Size limit", value: "20 KB by default, adjustable" },
+      { label: "Fit", value: "Whole signature kept, never cropped" },
+      { label: "Output format", value: "JPEG" },
+      { label: "Tip", value: "Sign with a dark pen on plain white paper" },
+    ],
+    howTo: [
+      {
+        title: "Photograph your signature",
+        body: "Sign with a black or dark blue pen on plain white paper. Photograph it from directly above in good light, filling most of the frame.",
+      },
+      {
+        title: "Upload it",
+        body: "Choose the photo. FitKB places the whole signature inside a 400×160 pixel white box without cropping any part of it.",
+      },
+      {
+        title: "Change the box if your form needs it",
+        body: "Enter the width and height your form specifies. The signature is centred and padded with white.",
+      },
+      {
+        title: "Download",
+        body: "Check that the strokes are readable in the preview, then tap Download.",
+      },
+    ],
+    faq: [
+      {
+        question: "Why is there white space around my signature?",
+        answer:
+          "Contain mode keeps the entire signature and fills the rest of the box with white, so nothing is cut off. Crop the photo closer to the signature before uploading to reduce the padding.",
+      },
+      {
+        question: "The paper looks grey. Can I fix that?",
+        answer: "Retake the photo in brighter, even light, or near a window. Grey paper costs bytes, while a clean white background compresses to almost nothing.",
+      },
+      ...sharedFaq,
+    ],
+    lastReviewed: LAST_REVIEWED,
+    relatedSlugs: ["passport-size-photo-35x45mm", "compress-image-to-20kb", "compress-image-to-10kb"],
   },
 ] as const satisfies readonly ToolDefinition[];
 
@@ -503,4 +376,7 @@ export function getAllTools(): readonly ToolDefinition[] {
 export function getRelatedTools(tool: ToolDefinition): ToolDefinition[] {
   return tool.relatedSlugs.map((slug) => toolsBySlug.get(slug)).filter((item): item is ToolDefinition => item !== undefined);
 }
-````
+
+/** Free-form tool shown on the home page. */
+export const homePreset: PresetSpec = { targetKB: 50, mode: "original", width: 1600, height: 1600, format: "jpeg", focusY: 50 };
+```

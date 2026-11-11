@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: absoluteUrl("/"), lastModified: newest, changeFrequency: "weekly", priority: 1 },
     ...tools.map((tool) => ({
-      url: absoluteUrl(`/tools/${tool.slug}`),
+      url: absoluteUrl(`/${tool.slug}`),
       lastModified: tool.lastReviewed,
       changeFrequency: "monthly" as const,
       priority: 0.9,

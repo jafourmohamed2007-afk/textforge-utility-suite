@@ -1,6 +1,6 @@
-# 31. `components/ToolGuide.tsx`
+# 27. `components/ToolGuide.tsx`
 
-E-E-A-T content panels: how-to, syntax table, method, FAQ.
+E-E-A-T content panels: how-to, output spec, method, FAQ.
 
 ```tsx
 import Link from "next/link";
@@ -9,9 +9,8 @@ import type { ToolDefinition } from "@/lib/types";
 const reviewedFormat = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
 /**
- * Server-rendered educational content placed *below* the interactive
- * workspace: step-by-step process, syntax reference, privacy/method notes and
- * FAQ. Mirrors the HowTo + FAQPage JSON-LD so on-page text and structured data
+ * Server-rendered content placed *below* the interactive workspace:
+ * step-by-step process, output specification, method/privacy notes and FAQ. Mirrors the HowTo + FAQPage JSON-LD so on-page text and structured data
  * always agree.
  */
 export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: readonly ToolDefinition[] }) {
@@ -41,36 +40,23 @@ export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: re
         </ol>
       </section>
 
-      <section aria-labelledby="syntax-heading">
-        <h2 id="syntax-heading" className="text-2xl font-bold tracking-tight text-ink">
-          Syntax reference: what changes and why
+      <section aria-labelledby="spec-heading">
+        <h2 id="spec-heading" className="text-2xl font-bold tracking-tight text-ink">
+          Output specification
         </h2>
         <p className="mt-2 max-w-prose text-sm text-ink-soft">
-          Each rule below is applied with native JavaScript string and regular-expression methods, in the order listed, directly on your
-          device.
+          These are the starting settings for this page. You can change every one of them in the Settings panel above.
         </p>
         <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-panel">
           <table className="min-w-full text-left text-sm">
-            <caption className="sr-only">{tool.name} transformation rules</caption>
-            <thead className="bg-panel-strong">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold text-ink">
-                  Input
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold text-ink">
-                  Output
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold text-ink">
-                  Rule
-                </th>
-              </tr>
-            </thead>
+            <caption className="sr-only">{tool.name} output specification</caption>
             <tbody>
-              {tool.syntax.map((rule) => (
-                <tr key={`${rule.pattern}-${rule.result}`} className="border-t border-line">
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-ink">{rule.pattern}</td>
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-brand-700 dark:text-brand-300">{rule.result}</td>
-                  <td className="min-w-56 px-4 py-3 text-ink-soft">{rule.note}</td>
+              {tool.specs.map((row, index) => (
+                <tr key={row.label} className={index > 0 ? "border-t border-line" : undefined}>
+                  <th scope="row" className="whitespace-nowrap bg-panel-strong px-4 py-3 font-semibold text-ink">
+                    {row.label}
+                  </th>
+                  <td className="px-4 py-3 text-ink-soft">{row.value}</td>
                 </tr>
               ))}
             </tbody>
@@ -84,16 +70,20 @@ export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: re
         </h2>
         <ul className="mt-3 flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-ink-soft">
           <li>
-            <strong className="text-ink">Runs locally.</strong> The page ships a small JavaScript function for this tool. Your text is
-            processed in browser memory and is never sent over the network, so there is zero server latency and nothing to leak.
+            <strong className="text-ink">Runs on your device.</strong> The photo is decoded and re-encoded with the browser&apos;s Canvas API. It
+            is never uploaded, so passport photos and signatures stay private.
           </li>
           <li>
-            <strong className="text-ink">Deterministic output.</strong> The same input and options always produce the same result. There
-            is no AI rewriting; only the syntax described in the reference table is changed.
+            <strong className="text-ink">How the size is reached.</strong> FitKB tries the highest JPEG quality first, then binary-searches the
+            quality until the file is at or under the limit. Dimensions are reduced only when quality alone cannot reach it, and never for
+            fixed-size photos.
           </li>
           <li>
-            <strong className="text-ink">Tested rules.</strong> Each transformation is covered by automated tests for edge cases such as
-            Windows line endings, emoji, quoted fields and identifiers containing underscores.
+            <strong className="text-ink">Safe for strict forms.</strong> The limit is applied as KB × 1000 bytes, so the file passes whether a
+            portal counts 1 KB as 1000 or 1024 bytes. Metadata such as GPS location is not copied into the new file.
+          </li>
+          <li>
+            <strong className="text-ink">Tested.</strong> The size search and crop calculations are covered by automated tests.
           </li>
           <li>
             <strong className="text-ink">Last reviewed:</strong> <time dateTime={tool.lastReviewed}>{reviewed}</time>.
@@ -123,13 +113,13 @@ export function ToolGuide({ tool, related }: { tool: ToolDefinition; related: re
       {related.length > 0 ? (
         <section aria-labelledby="related-heading">
           <h2 id="related-heading" className="text-2xl font-bold tracking-tight text-ink">
-            Related tools
+            Related presets
           </h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {related.map((item) => (
               <li key={item.slug}>
                 <Link
-                  href={`/tools/${item.slug}`}
+                  href={`/${item.slug}`}
                   className="flex min-h-12 flex-col rounded-2xl border border-line bg-panel p-4 transition-colors hover:border-brand-500"
                 >
                   <span className="font-semibold text-ink">{item.name}</span>

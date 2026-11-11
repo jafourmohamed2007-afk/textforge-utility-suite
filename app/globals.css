@@ -10,12 +10,12 @@
     "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  --color-brand-50: #eef4ff;
-  --color-brand-300: #a5b8fc;
-  --color-brand-500: #5b6cf0;
-  --color-brand-600: #4552e0;
-  --color-brand-700: #3a43c4;
-  --color-brand-800: #31389e;
+  --color-brand-50: #e9f7f4;
+  --color-brand-300: #6fd3bf;
+  --color-brand-500: #14a088;
+  --color-brand-600: #0d8571;
+  --color-brand-700: #0a6a5b;
+  --color-brand-800: #08544a;
 
   --color-ink: var(--tf-ink);
   --color-ink-soft: var(--tf-ink-soft);
@@ -29,27 +29,29 @@
 
 :root {
   color-scheme: light;
-  --tf-ink: #0f172a;
-  --tf-ink-soft: #526075;
-  --tf-page: #f6f7fb;
+  --tf-ink: #10201d;
+  --tf-ink-soft: #4f625e;
+  --tf-page: #f4f7f6;
   --tf-panel: #ffffff;
-  --tf-panel-strong: #f1f3f9;
+  --tf-panel-strong: #edf2f0;
   --tf-surface: #ffffff;
-  --tf-line: #dfe3ec;
-  --tf-muted-track: #c3c9d6;
+  --tf-line: #dbe4e1;
+  --tf-muted-track: #bfcdc9;
+  --tf-checker: #e8eeec;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --tf-ink: #e6e9f2;
-    --tf-ink-soft: #9aa4b8;
-    --tf-page: #0b0f19;
-    --tf-panel: #121827;
-    --tf-panel-strong: #1a2133;
-    --tf-surface: #172033;
-    --tf-line: #263049;
-    --tf-muted-track: #3a4560;
+    --tf-ink: #e3ece9;
+    --tf-ink-soft: #94a8a3;
+    --tf-page: #0a1312;
+    --tf-panel: #111c1a;
+    --tf-panel-strong: #182624;
+    --tf-surface: #152220;
+    --tf-line: #243633;
+    --tf-muted-track: #36504b;
+    --tf-checker: #1b2a27;
   }
 }
 
@@ -96,6 +98,15 @@
   min-height: 3rem;
   min-width: 3rem;
   touch-action: manipulation;
+}
+
+/* Checkerboard behind image previews so padding and transparency are visible. */
+@utility checker {
+  background-color: var(--tf-panel-strong);
+  background-image: linear-gradient(45deg, var(--tf-checker) 25%, transparent 25%), linear-gradient(-45deg, var(--tf-checker) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--tf-checker) 75%), linear-gradient(-45deg, transparent 75%, var(--tf-checker) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
 }
 
 /* Large, thumb-friendly range slider (48px hit area, 28px thumb). */

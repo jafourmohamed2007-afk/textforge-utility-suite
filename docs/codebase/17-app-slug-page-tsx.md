@@ -1,9 +1,14 @@
+# 17. `app/[slug]/page.tsx`
+
+Dynamic preset route: generateStaticParams, generateMetadata, JSON-LD.
+
+```tsx
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PhotoWorkspace } from "@/components/PhotoWorkspace";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ToolGuide } from "@/components/ToolGuide";
-import { ToolWorkspace, type WorkspaceTool } from "@/components/ToolWorkspace";
 import { getAllTools, getRelatedTools, getToolBySlug } from "@/data/tools-registry";
 import { absoluteUrl, buildToolTitle, siteConfig } from "@/lib/site";
 import { serializeJsonLd, toolPageGraph } from "@/lib/structured-data";
@@ -22,10 +27,10 @@ export function generateStaticParams(): Array<{ slug: string }> {
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
-  if (!tool) return { title: "Tool not found", robots: { index: false } };
+  if (!tool) return { title: "Page not found", robots: { index: false } };
 
   const title = buildToolTitle(tool.name);
-  const path = `/tools/${tool.slug}`;
+  const path = `/${tool.slug}`;
 
   return {
     title: { absolute: title },
@@ -51,25 +56,12 @@ export default async function ToolPage({ params }: ToolPageProps) {
   const tool = getToolBySlug(slug);
   if (!tool) notFound();
 
-  // Only the fields the client island needs are serialised into the RSC payload.
-  const workspaceTool: WorkspaceTool = {
-    slug: tool.slug,
-    name: tool.name,
-    inputLabel: tool.inputLabel,
-    outputLabel: tool.outputLabel,
-    inputPlaceholder: tool.inputPlaceholder,
-    sampleInput: tool.sampleInput,
-    downloadName: tool.downloadName,
-    downloadMime: tool.downloadMime,
-    options: tool.options,
-  };
-
   return (
     <>
       {/* SoftwareApplication + HowTo + FAQPage + BreadcrumbList structured data. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(toolPageGraph(tool)) }} />
       <SiteHeader activeSlug={tool.slug} />
-      <main id="main" className="mx-auto max-w-6xl px-4 pb-8 pt-4 sm:pt-6">
+      <main id="main" className="mx-auto max-w-6xl px-4 pb-8 pt-2 sm:pt-4">
         <nav aria-label="Breadcrumb" className="text-sm text-ink-soft">
           <ol className="flex flex-wrap items-center gap-1">
             <li>
@@ -85,15 +77,16 @@ export default async function ToolPage({ params }: ToolPageProps) {
         </nav>
 
         <header className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">{tool.category} tool</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">{tool.category}</p>
           <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{tool.name} Online</h1>
           <p className="mt-2 max-w-3xl text-base leading-relaxed text-ink-soft">{tool.intro}</p>
         </header>
 
-        <ToolWorkspace tool={workspaceTool} />
+        <PhotoWorkspace preset={tool.preset} label={tool.name} />
 
         <ToolGuide tool={tool} related={getRelatedTools(tool)} />
       </main>
     </>
   );
 }
+```

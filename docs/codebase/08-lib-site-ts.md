@@ -4,12 +4,12 @@ Site config and the SEO title builder.
 
 ```ts
 export const siteConfig = {
-  name: "TextForge",
-  fullName: "TextForge Dynamic Tool Suite",
+  name: "FitKB",
+  fullName: "FitKB Photo Resizer",
   description:
-    "Free, private, mobile-first text utilities: WhatsApp formatter, whitespace cleaner, text to CSV converter and Markdown stripper. Everything runs in your browser.",
+    "Resize and compress photos to an exact KB limit for online forms: 10 KB, 20 KB, 50 KB, 100 KB, passport photos and signatures. Free, private and runs in your browser.",
   /** Public origin; override with NEXT_PUBLIC_SITE_URL at build time. */
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://textforge.example.com").replace(/\/+$/, ""),
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://fitkb.example.com").replace(/\/+$/, ""),
   locale: "en_US",
   year: 2026,
 } as const;
@@ -20,6 +20,6 @@ export function absoluteUrl(path = "/"): string {
 
 /** Title pattern targeting "online / free / mobile" search intent. */
 export function buildToolTitle(toolName: string): string {
-  return `${toolName} Online - Free Text Formatter Tool (${siteConfig.year} Mobile Friendly)`;
+  return `${toolName} Online - Free Photo Resizer (${siteConfig.year} Mobile Friendly)`;
 }
 ```

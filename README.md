@@ -1,61 +1,49 @@
-# TextForge Dynamic Tool Suite
+# FitKB Photo Resizer
 
-Private, mobile-first text utilities built with **Next.js 15 (App Router)**, **strict TypeScript** and **Tailwind CSS v4**. All processing runs in the browser with native string methods. Nothing is sent to a server.
+FitKB resizes and compresses photos to an exact KB limit for online forms: 10 KB, 20 KB, 50 KB, 100 KB and 200 KB, 35×45 mm and 2×2 inch passport photos, and signatures. It is built with **Next.js 15 (App Router)**, **strict TypeScript** and **Tailwind CSS v4**. All image processing runs in the browser with the Canvas API, so photos are never uploaded.
 
-| Route | Tool |
+| Route | Preset |
 | --- | --- |
-| `/tools/whatsapp-text-formatter` | Plain text → WhatsApp bold / italic / strikethrough / monospace / lists, plus Markdown → WhatsApp |
-| `/tools/bulk-whitespace-cleaner` | Trailing spaces, tab indentation, repeated spaces, triple line breaks, invisible characters |
-| `/tools/raw-text-to-csv-converter` | Comma / tab / semicolon / pipe / aligned text → RFC 4180 CSV with table preview |
-| `/tools/markdown-to-clean-text-stripper` | Markdown (headings, emphasis, links, code, tables, HTML) → plain text |
+| `/` | Free-form resizer (any KB limit, any dimensions) |
+| `/compress-image-to-10kb` … `/compress-image-to-200kb` | Size-limit presets |
+| `/passport-size-photo-35x45mm` | 413×531 px crop (35×45 mm at 300 DPI), ≤ 50 KB |
+| `/us-passport-photo-2x2` | 600×600 px square crop, ≤ 240 KB |
+| `/signature-resize-20kb` | 400×160 px white canvas, signature kept whole, ≤ 20 KB |
 
 ## Quick start
 
 ```bash
 npm install
 npm run dev          # http://localhost:3000
-npm test             # processor unit tests (node:test, no extra deps)
+npm test             # unit tests (node:test, no extra deps)
 npm run typecheck
 npm run build && npm start
 ```
 
 You need Node 22.18 or newer, because the tests run TypeScript directly with Node's built-in type stripping. Set `NEXT_PUBLIC_SITE_URL` (see `.env.example`) before building for production so canonical URLs, the sitemap and the JSON-LD point at your domain.
 
-## Architecture
+## How the size limit is reached
 
-```
-data/tools-registry.ts     Static, serializable tool dictionary (copy, options, how-to, syntax, FAQ)
-lib/processors/*.ts        Pure (input, options) => result functions, one per tool
-lib/processors/index.ts    slug -> processor map
-app/tools/[slug]/page.tsx  generateStaticParams + generateMetadata + JSON-LD + layout
-components/ToolWorkspace   Client island: options, input/output panes, copy, download, stats
-components/ToolGuide       Server-rendered how-to, syntax reference, methodology and FAQ
-```
+1. The photo is decoded with `createImageBitmap(file, { imageOrientation: "from-image" })`, so phone photos stay upright.
+2. `planDraw` works out the canvas and crop for the chosen mode: keep original, fit inside a box, exact size with crop (`cover`), or exact size with white padding (`contain`).
+3. `fitToTarget` encodes at quality 0.95. If that is too big, it encodes at the quality floor and binary-searches the highest quality that fits. When even the floor is too big and the dimensions are not fixed, it shrinks the image and repeats. When the first guess was too small, it grows the image back. Fixed-size photos only ever lose quality.
+4. The limit is applied as KB × 1000 bytes, so files pass portals that count 1 KB as either 1000 or 1024 bytes.
 
-### Adding a tool
+The search (`lib/image/fit.ts`) and the geometry (`lib/image/math.ts`) are pure functions covered by `tests/image.test.ts`.
 
-1. Add an entry to `data/tools-registry.ts` (slug, copy, options, howTo, syntax, faq).
-2. Write `lib/processors/<name>.ts` that exports `(input: string, options: OptionValues) => ProcessResult`.
-3. Register it in `lib/processors/index.ts`.
+## Adding a preset
 
-The page, metadata, structured data, sitemap entry and navigation are generated automatically.
+Add an entry to `data/tools-registry.ts` with the slug, page text, `preset` settings, spec rows, how-to steps and FAQ. The page, metadata, structured data, sitemap entry and navigation are generated automatically.
 
-## Performance and UX choices
+## Performance, UX and SEO
 
-- **Runtime dependencies:** `next`, `react` and `react-dom` only. There are no UI kits, icon packs, web fonts, analytics or third-party scripts. Fonts use the system stack, so no font swap shifts the layout.
-- **Static generation:** every tool page is pre-rendered at build time (`dynamicParams = false`). Unknown slugs return a static 404.
-- **Zero layout shift:** panes use fixed heights (`h-64 / sm:h-80 / lg:h-[30rem]`). The Copy button has a fixed width, so its "Copied!" state does not resize it. The stats strip has a reserved minimum height. Measured CLS is 0 on a Pixel 7 profile and at 1366×900.
-- **Smooth typing:** processing runs through `useDeferredValue` + `useMemo`, so typing stays responsive on low-end phones even with large inputs.
-- **Touch:** every button, select, toggle, slider and FAQ summary is at least 48×48 px. The sliders have a 28 px thumb. Form controls use a 16 px font, so iOS does not zoom when you tap them.
-- **Clipboard:** the async Clipboard API is used where available. When it is not, the button falls back to a selection-based `execCommand("copy")` and shows "Copied!" or "Copy failed". The Paste button falls back to focusing the input with a hint to long-press.
-
-## SEO
-
-- `generateMetadata` builds the title as `"<Tool Name> Online - Free Text Formatter Tool (2026 Mobile Friendly)"`, along with the description, keywords, canonical, Open Graph and Twitter tags.
-- Each tool page includes a JSON-LD `@graph` with `SoftwareApplication` (free `Offer`), `HowTo`, `FAQPage`, `BreadcrumbList` and `Organization`. The JSON is escaped so it cannot break out of the script tag. Next.js recommends rendering JSON-LD as a `<script>` in the page component. Google reads it anywhere in the document.
-- Under the workspace, each page has server-rendered how-to steps, a syntax reference table, a methodology/privacy section with a "last reviewed" date, an FAQ and related tools. This text matches the structured data.
-- `sitemap.xml`, `robots.txt` and `manifest.webmanifest` are generated from the registry.
+- **Runtime dependencies:** `next`, `react` and `react-dom` only. There are no UI kits, web fonts or third-party scripts.
+- **Static generation:** every preset page is pre-rendered at build time (`dynamicParams = false`). Unknown slugs return a static 404.
+- **No layout shift:** upload and result previews have fixed heights. The stats strip has a reserved height. The width and height fields are always shown, and are disabled when they don't apply, so nothing jumps.
+- **Touch:** every control is at least 48×48 px. Number fields use a 16 px font, so iOS does not zoom when you tap them.
+- **Ways to add a photo:** tap to pick one (gallery or camera), drag and drop, or paste.
+- **Metadata:** titles follow `"<Preset> Online - Free Photo Resizer (2026 Mobile Friendly)"`. Each preset page includes `SoftwareApplication`, `HowTo`, `FAQPage` and `BreadcrumbList` JSON-LD, plus how-to, specification, methodology and FAQ sections that match the structured data.
 
 ## Reviewing on mobile
 
-`docs/codebase/` contains one Markdown file per source file (numbered in build order, each with its path and a single code block). Regenerate it after changes with `npm run docs:codebase`.
+`docs/codebase/` contains one Markdown file per source file. Regenerate it with `npm run docs:codebase`.

@@ -1,4 +1,4 @@
-# 18. `app/layout.tsx`
+# 15. `app/layout.tsx`
 
 Root layout, default metadata and viewport.
 
@@ -12,7 +12,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.fullName} - Free Online Text Tools (${siteConfig.year})`,
+    default: `${siteConfig.fullName} - Resize Images to Exact KB (${siteConfig.year})`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#121827" },
+    { media: "(prefers-color-scheme: dark)", color: "#111c1a" },
   ],
 };
 

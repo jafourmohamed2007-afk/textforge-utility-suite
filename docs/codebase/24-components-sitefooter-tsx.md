@@ -1,4 +1,4 @@
-# 27. `components/SiteFooter.tsx`
+# 24. `components/SiteFooter.tsx`
 
 Footer.
 
@@ -14,16 +14,16 @@ export function SiteFooter() {
         <div>
           <p className="font-semibold text-ink">{siteConfig.fullName}</p>
           <p className="mt-2 max-w-prose text-ink-soft">
-            Every tool runs 100% in your browser. Your text is never uploaded, logged or stored, and there are no accounts, trackers or
-            third-party scripts.
+            Photos are resized and compressed inside your browser. Nothing is uploaded, stored or logged, and there are no accounts, trackers
+            or third-party scripts.
           </p>
         </div>
-        <nav aria-label="All tools">
-          <p className="font-semibold text-ink">Tools</p>
-          <ul className="mt-1">
+        <nav aria-label="All presets">
+          <p className="font-semibold text-ink">Presets</p>
+          <ul className="mt-1 grid grid-cols-1 sm:grid-cols-2">
             {getAllTools().map((tool) => (
               <li key={tool.slug}>
-                <Link href={`/tools/${tool.slug}`} className="tap-target inline-flex items-center text-ink-soft hover:text-ink">
+                <Link href={`/${tool.slug}`} className="tap-target inline-flex items-center text-ink-soft hover:text-ink">
                   {tool.name}
                 </Link>
               </li>

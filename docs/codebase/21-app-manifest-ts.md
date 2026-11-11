@@ -1,4 +1,4 @@
-# 24. `app/manifest.ts`
+# 21. `app/manifest.ts`
 
 Web app manifest.
 
@@ -13,8 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: siteConfig.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#f6f7fb",
-    theme_color: "#4552e0",
+    background_color: "#f4f7f6",
+    theme_color: "#0d8571",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

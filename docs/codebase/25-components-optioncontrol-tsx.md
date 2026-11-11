@@ -1,4 +1,4 @@
-# 28. `components/OptionControl.tsx`
+# 25. `components/OptionControl.tsx`
 
 Touch-friendly select / range / toggle controls.
 
