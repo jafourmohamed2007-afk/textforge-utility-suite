@@ -1,4 +1,21 @@
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://fitkb.example.com").replace(/\/+$/, "");
+/**
+ * Public origin, in order of preference:
+ *  1. NEXT_PUBLIC_SITE_URL, if set;
+ *  2. on Vercel, the project's production domain (your custom domain once one
+ *     is connected, otherwise the .vercel.app address), which Vercel provides
+ *     at build time as VERCEL_PROJECT_PRODUCTION_URL;
+ *  3. a placeholder for local development.
+ * next.config.ts copies the result into NEXT_PUBLIC_SITE_URL so browser code
+ * sees the same value.
+ */
+export function resolveSiteUrl(env: Record<string, string | undefined>): string {
+  const explicit = env.NEXT_PUBLIC_SITE_URL?.trim();
+  const vercel = env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  const url = explicit || (vercel ? `https://${vercel.replace(/^https?:\/\//, "")}` : "https://fitkb.example.com");
+  return url.replace(/\/+$/, "");
+}
+
+const siteUrl = resolveSiteUrl(process.env);
 
 /** Accepts "ca-pub-1234567890123456" (or "pub-…"); anything else disables ads. */
 export function parseAdsenseClient(raw: string | undefined): string | null {

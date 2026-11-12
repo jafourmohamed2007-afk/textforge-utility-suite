@@ -10,7 +10,7 @@ import { getAllGuides, getGuidesForTool, readingMinutes } from "../data/guides.t
 import { buildSitePages } from "../data/site-pages.ts";
 import { getAllTools } from "../data/tools-registry.ts";
 import { parseLinks, stripLinks } from "../lib/links.ts";
-import { parseAdSlot, parseAdsenseClient } from "../lib/site.ts";
+import { parseAdSlot, parseAdsenseClient, resolveSiteUrl } from "../lib/site.ts";
 import type { ContentSection } from "../lib/types.ts";
 
 const settings = {
@@ -133,6 +133,13 @@ describe("site pages and ads", () => {
     assert.match(privacy(pagesWithAds), /adssettings\.google\.com/);
     assert.doesNotMatch(privacy(pagesWithoutAds), /Google/);
     assert.match(privacy(pagesWithoutAds), /shows no ads/);
+  });
+
+  it("resolves the public site address", () => {
+    assert.equal(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://fitkb.com/", VERCEL_PROJECT_PRODUCTION_URL: "x.vercel.app" }), "https://fitkb.com");
+    assert.equal(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "", VERCEL_PROJECT_PRODUCTION_URL: "fitkb.com" }), "https://fitkb.com");
+    assert.equal(resolveSiteUrl({ VERCEL_PROJECT_PRODUCTION_URL: "fitkb-abc.vercel.app" }), "https://fitkb-abc.vercel.app");
+    assert.equal(resolveSiteUrl({}), "https://fitkb.example.com");
   });
 
   it("validates AdSense ids", () => {
